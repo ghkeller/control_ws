@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<launch>
+
+    <!-- starts the nodes responsible for offboard control in PX4-->
+    <arg name="uav_namespace" default="uav_1" />
+    <arg name="flight_fname" default="flight_1_uav_1" />
+    <arg name="avoidance" default="false" />
+    <arg name="waypoint_distance_hit_thresh" default="1.0" />
+    <arg name="waypoint_hit_wait_time" default="1.0" />
+    <arg name="starting_waypoint_number" default="0" />
+    <arg name="buffer_frequency" default="200" />
+
+    <!-- start the main node -->
+    <node name="control" ns="$(arg uav_namespace)" pkg="uav_control" type="uav_control_node" output="screen">
+        <param name="flight_fname" value="$(arg flight_fname)" />
+        <param name="avoidance" value="$(arg avoidance)" />
+        <param name="waypoint_distance_hit_thresh" value="$(arg waypoint_distance_hit_thresh)" />
+        <param name="waypoint_hit_wait_time" value="$(arg waypoint_hit_wait_time)" />
+        <param name="starting_waypoint_number" value="$(arg starting_waypoint_number)" />
+    </node>
+
+    <!-- start the main node -->
+    <node name="setpoint_buffer" ns="$(arg uav_namespace)" pkg="uav_control" type="setpoint_raw_buffer_node" output="screen">
+        <param name="buffer_frequency" value="$(arg buffer_frequency)" />
+    </node>
+</launch>

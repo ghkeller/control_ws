@@ -1,0 +1,8 @@
+prefix=/home/gordon_l1804/control_ws/devel
+
+Name: uav_control
+Description: Description of uav_control
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

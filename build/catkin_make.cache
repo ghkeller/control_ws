@@ -1,0 +1,2 @@
+uav_control
+-DCATKIN_DEVEL_PREFIX=/home/gordon_l1804/control_ws/devel -DCMAKE_INSTALL_PREFIX=/home/gordon_l1804/control_ws/install -G Unix Makefiles
