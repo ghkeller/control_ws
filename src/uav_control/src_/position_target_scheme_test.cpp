@@ -108,24 +108,82 @@ int test_4(void) {
 }
 
 
-/*
 int test_5(void) {
-    std::cout << "Test 5: instantiate an instance of a message to populate." << std::endl;
+    std::cout << "Test 5: add one setpoint to the setpoint queue." << std::endl;
 
     PositionTargetScheme pts;
 	string _name = "main_sp_scheme";
-	uint16_t _flags = IGNORE_VX | IGNORE_VY | IGNORE_VZ | IGNORE_AFX | IGNORE_AFY | IGNORE_AFZ;
+	uint16_t _flags = PositionTarget::IGNORE_VX | 
+						PositionTarget::IGNORE_VY | 
+						PositionTarget::IGNORE_VZ | 
+						PositionTarget::IGNORE_AFX | 
+						PositionTarget::IGNORE_AFY | 
+						PositionTarget::IGNORE_AFZ;
+	uint16_t _coord_frame = PositionTarget::FRAME_LOCAL_NED; 
 	pts.setName(_name);
 	pts.setIgnoreFlags(_flags);
+	pts.setCoordinateFrame(_coord_frame);
 
     std::cout << pts.getName() << std::endl;
 	std::cout << "IGNORE_FLAGS: " << pts.getIgnoreFlags() << std::endl;
 
 	mavros_msgs::PositionTarget sp;
-	pts.addSetpointToQueue(sp)
+	bool success = pts.addSetpointToQueue(sp);
+
+	if (success == true) {
+		std::cout << "successfully added setpoint to the queue" << std::endl;
+	} else {
+		std::cerr << "was not successful in adding setpoint to the queue" << std::endl;
+	}
+
     return 0;
 }
-*/
+
+int test_6(void) {
+    std::cout << "Test 6: get the setpoint from the queue of size one" << std::endl;
+
+    PositionTargetScheme pts;
+	string _name = "main_sp_scheme";
+	uint16_t _flags = PositionTarget::IGNORE_VX | 
+						PositionTarget::IGNORE_VY | 
+						PositionTarget::IGNORE_VZ | 
+						PositionTarget::IGNORE_AFX | 
+						PositionTarget::IGNORE_AFY | 
+						PositionTarget::IGNORE_AFZ;
+	uint16_t _coord_frame = PositionTarget::FRAME_LOCAL_NED; 
+	pts.setName(_name);
+	pts.setIgnoreFlags(_flags);
+	pts.setCoordinateFrame(_coord_frame);
+
+    std::cout << pts.getName() << std::endl;
+	std::cout << "IGNORE_FLAGS: " << pts.getIgnoreFlags() << std::endl;
+
+	mavros_msgs::PositionTarget sp;
+	bool success = pts.addSetpointToQueue(sp);
+
+	if (success == true) {
+		std::cout << "successfully added setpoint to the queue" << std::endl;
+	} else {
+		std::cerr << "was not successful in adding setpoint to the queue" << std::endl;
+	}
+
+	if (pts.queueEmpty == false) {
+		mavros_msgs::PositionTarget sp_out = pts.nextSetpoint();
+		if (sp_out != NULL) {
+			std::cout << "successfully got setpoint to the queue" << std::endl;
+			//print the info of the setpoint we just got
+
+		} else {
+			std::cerr << "was not successful in getting setpoint from the queue" << std::endl;
+		}
+	} else {
+		std::cerr << "cannot get sp from queue -- the queue is empty" << std::endl;
+	}
+
+    return 0;
+}
+
+
 } //namespace position_target_scheme_tests END
 
 using namespace position_target_scheme_tests;
@@ -162,6 +220,14 @@ int main(void)
 
     std::cout << "Test 4:" << std::endl;
     result = test_4();
+    if ( result < 0 ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+
+    std::cout << "Test 5:" << std::endl;
+    result = test_5();
     if ( result < 0 ) {
         std::cout << "Test failed." << std::endl;
     } else {
