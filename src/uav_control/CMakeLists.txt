@@ -152,12 +152,12 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
-add_executable(uav_node
-  src/uav_node.cpp
-)
-target_link_libraries(uav_node
-  ${catkin_LIBRARIES}
-)
+#add_executable(uav_node
+#  src/uav_node.cpp
+#)
+#target_link_libraries(uav_node
+#  ${catkin_LIBRARIES}
+#)
 
 add_executable(uav_control_node
   src/uav_node_v2.cpp
@@ -187,12 +187,12 @@ target_link_libraries(vis_pos_update_thread
   ${catkin_LIBRARIES}
 )
 
-add_executable(teleop_mavros
-  src/teleop_mavros.cpp
-)
-target_link_libraries(teleop_mavros
-  ${catkin_LIBRARIES}
-)
+#add_executable(teleop_mavros
+#  src/teleop_mavros.cpp
+#)
+#target_link_libraries(teleop_mavros
+#  ${catkin_LIBRARIES}
+#)
 
 #############
 ## Install ##

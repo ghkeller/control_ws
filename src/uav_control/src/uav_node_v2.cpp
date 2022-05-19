@@ -201,7 +201,7 @@ bool load_flight(std::string filename) {
 	        std::string cell;
 	        mavros_msgs::PositionTarget tp;
 
-	        tp.coordinate_frame = mavros_msgs::PositionTarget::FRAME_BODY_NED;
+	        tp.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
 
 	        //px
 	        std::getline(lineStream,cell,',');
