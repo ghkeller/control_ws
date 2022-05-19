@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstddef>
+#include <queue>
 
 /* local includes */
 #include "mavros_msgs/PositionTarget.h"
@@ -38,6 +39,7 @@ class PositionTargetScheme
 	string name;
 	uint16_t ignore_flags;
 	uint16_t coord_frame;
+	queue<mavros_msgs::PositionTarget> setpoint_queue;
 
     protected:
 
