@@ -3,8 +3,8 @@
  * @brief Offboard control example node, written with MAVROS version 0.19.x, PX4 Pro Flight
  * Stack and tested in Gazebo SITL
 
- * This node runs the state machine for the vehicle but does not post mavros position topics
- * (this is left to the thread running in tandem).
+ * 
+ * 
  */
 
 #include <ros/ros.h>
@@ -21,10 +21,65 @@
 #include <string>
 #include <iostream>
 
+#include "PositionTargetScheme.h"
 #include "agent_sm.cpp"
 
-namespace uav_node_v2
+namespace fly_mission
 {
+
+class ROSMissionComponents
+{
+	public:
+	void getParams(ros::NodeHandle)
+
+
+	private:
+	std::string flight_name;
+	double waypoint_distance_hit_thresh;
+	double waypoint_hit_wait_time;
+	uint8_t startin_waypoint_number;
+	bool avoidance;
+	
+}
+
+void getParams(ros::NodeHandle _nh)
+{
+    _nh.getParam(ros::this_node::getNamespace() + "/control/flight_fname", flight_fname);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/avoidance", avoidance);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_distance_hit_thresh", waypoint_distance_hit_thresh);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_hit_wait_time", waypoint_hit_wait_time);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/starting_waypoint_number", starting_waypoint_number);
+}
+
+void setTopicsAndServices(ros::NodeHandle _nh)
+{
+	//topics
+    = ros::this_node::getNamespace() + "/mavros/state";
+    = ros::this_node::getNamespace() +  "/mavros/local_position/pose";
+    = ros::this_node::getNamespace() + "/mavthread/setpoint_raw/local";
+    
+	//services
+    std::string arming_service = ros::this_node::getNamespace() + "/mavros/cmd/arming";
+    std::string set_mode_service = ros::this_node::getNamespace() + "/mavros/set_mode";
+    std::string takeoff_service = ros::this_node::getNamespace() + "/mavros/cmd/takeoff";
+
+	//subs, pubs, etc
+    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
+            (state_topic, 10, state_cb);
+    ros::Subscriber position_sub = nh.subscribe<geometry_msgs::PoseStamped>
+            (position_topic, 10, position_cb);
+    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
+            (arming_service);
+    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
+            (set_mode_service);
+    ros::ServiceClient takeoff_cl = nh.serviceClient<mavros_msgs::CommandTOL>
+    		(takeoff_service);
+    target_pos_pub = nh.advertise<mavros_msgs::PositionTarget>
+            (setpoint_topic, 100);
+                //declare subscribers
+    ros::Subscriber gcs_alert_sub = nh.subscribe<std_msgs::String>
+            ("/gcs/vehicle_alert", 10, gcs_alert_cb);
+}
 //ros specific variables
 mavros_msgs::State current_state;
 geometry_msgs::PoseStamped current_pose;
@@ -41,6 +96,13 @@ bool coll_av_flag = false;
 // use this for timers
 ros::Time last_request;
 ros::Publisher target_pos_pub;
+
+//topic vars
+std::string state_topic;
+std::string position_topic;
+std::string setpoint_topic; 
+
+//service vars
 
 void state_cb(const mavros_msgs::State::ConstPtr& msg)
 {
@@ -335,30 +397,21 @@ bool load_flight(std::string filename) {
 }
 }
 
-using namespace uav_node_v2;
+using namespace fly_mission;
+
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "uav_node_v2");
     ros::NodeHandle nh;
 
+    ROS_INFO("Starting the 'fly_mission' control node.");
 
-    ROS_INFO("Started the uav control node.");
+	// read in ros parameter into their destination vars
+	getParams(nh);
 
-    std::string flight_fname;
-    bool avoidance;
-    double waypoint_distance_hit_thresh;
-    double waypoint_hit_wait_time;
-    int starting_waypoint_number;
-
-    nh.getParam(ros::this_node::getNamespace() + "/control/flight_fname",flight_fname);
-    nh.getParam(ros::this_node::getNamespace() + "/control/avoidance",avoidance);
-    nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_distance_hit_thresh",waypoint_distance_hit_thresh);
-    nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_hit_wait_time",waypoint_hit_wait_time);
-    nh.getParam(ros::this_node::getNamespace() + "/control/starting_waypoint_number",starting_waypoint_number);
-
+	// load the flight
     ROS_INFO("flight filename: %s", flight_fname.c_str());
-
     bool succ = load_flight(flight_fname);
     if (succ)
     {
@@ -367,32 +420,6 @@ int main(int argc, char **argv)
     {
         ROS_INFO("Did not successfully loaded flight %s", flight_fname.c_str());
     }
-
-
-    std::string state_topic = ros::this_node::getNamespace() + "/mavros/state";
-    std::string position_topic = ros::this_node::getNamespace() +  "/mavros/local_position/pose";
-
-    std::string setpoint_topic = ros::this_node::getNamespace() + "/mavthread/setpoint_raw/local";
-    
-    std::string arming_service = ros::this_node::getNamespace() + "/mavros/cmd/arming";
-    std::string set_mode_service = ros::this_node::getNamespace() + "/mavros/set_mode";
-    std::string takeoff_service = ros::this_node::getNamespace() + "/mavros/cmd/takeoff";
-
-    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
-            (state_topic, 10, state_cb);
-    ros::Subscriber position_sub = nh.subscribe<geometry_msgs::PoseStamped>
-            (position_topic, 10, position_cb);
-    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
-            (arming_service);
-    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
-            (set_mode_service);
-    ros::ServiceClient takeoff_cl = nh.serviceClient<mavros_msgs::CommandTOL>
-    		(takeoff_service);
-    target_pos_pub = nh.advertise<mavros_msgs::PositionTarget>
-            (setpoint_topic, 100);
-                //declare subscribers
-    ros::Subscriber gcs_alert_sub = nh.subscribe<std_msgs::String>
-            ("/gcs/vehicle_alert", 10, gcs_alert_cb);
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(10.0);

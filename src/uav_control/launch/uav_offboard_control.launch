@@ -1,14 +1,16 @@
 <?xml version="1.0"?>
 <launch>
+    <!-- get default parameters from yaml -->
+	<rosparam file="$(find uav_control)/config/flight.yaml" />
 
     <!-- starts the nodes responsible for offboard control in PX4-->
     <arg name="uav_namespace" default="uav_1" />
-    <arg name="flight_fname" default="flight_1_uav_1" />
-    <arg name="avoidance" default="false" />
-    <arg name="waypoint_distance_hit_thresh" default="1.0" />
-    <arg name="waypoint_hit_wait_time" default="1.0" />
-    <arg name="starting_waypoint_number" default="0" />
-    <arg name="buffer_frequency" default="200" />
+    <arg name="flight_fname" default="$(param flight_fname)" />
+    <arg name="avoidance" default="$(param avoidance)" />
+    <arg name="waypoint_distance_hit_thresh" default="$(param waypoint_distance_hit_thresh)" />
+    <arg name="waypoint_hit_wait_time" default="$(param waypoint_hit_wait_time)" />
+    <arg name="starting_waypoint_number" default="$(param starting_waypoint_number)" />
+    <arg name="buffer_frequency" default="$(param buffer_frequency)" />
 
     <!-- start the main node -->
     <node name="control" ns="$(arg uav_namespace)" pkg="uav_control" type="uav_control_node" output="screen">

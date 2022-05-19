@@ -1,0 +1,8 @@
+# flight yaml
+# used when launching fly_mission.launch and associated node(s)
+
+flight_fname: "flight_1.csv"
+avoidance: false
+waypoint_distance_hit_thresh: 5.0
+waypoint_hit_wait_time: 2.0
+starting_waypoint_number: 0
