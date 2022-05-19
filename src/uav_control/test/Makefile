@@ -6,7 +6,7 @@ EXE := $(BIN_DIR)/test
 SRC := $(wildcard $(SRC_DIR)/*.cpp)
 OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-CXXFLAGS := -Iinclude -I/opt/ros/melodic/include -I/home/gordon_l1804/catkin_ws/devel/include 
+CXXFLAGS := -Iinclude -I/opt/ros/melodic/include -I/$(HOME)/catkin_ws/devel/include 
 CFLAGS   := -Wall
 LDFLAGS  := -Llib
 LDLIBS   := -lm
