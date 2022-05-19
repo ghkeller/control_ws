@@ -52,6 +52,27 @@ uint16_t PositionTargetScheme::getCoordinateFrame()
 	return this->coord_frame;
 }
 
+bool PositionTargetScheme::queueEmpty(void)
+{
+	return this->setpoint_queue.empty();
+}
+
+
+mavros_msgs::PositionTarget PositionTargetScheme::nextSetpoint(void)
+{
+	mavros_msgs::PositionTarget ret_pt;
+
+	// check to make sure the queue has something in it
+	if (this->setpoint_queue.empty()) {
+		std::cerr << "Attempted to get the next setpoint from an empty queue" << std::endl;
+		return ret_pt;
+	} 
+
+	ret_pt = this->setpoint_queue.front();
+	this->setpoint_queue.pop();
+	return ret_pt;
+}
+
 
 bool PositionTargetScheme::addSetpointToQueue(mavros_msgs::PositionTarget sp)
 {

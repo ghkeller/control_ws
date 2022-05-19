@@ -159,6 +159,7 @@ int test_6(void) {
 	std::cout << "IGNORE_FLAGS: " << pts.getIgnoreFlags() << std::endl;
 
 	mavros_msgs::PositionTarget sp;
+	sp.position.x = 3;
 	bool success = pts.addSetpointToQueue(sp);
 
 	if (success == true) {
@@ -167,15 +168,11 @@ int test_6(void) {
 		std::cerr << "was not successful in adding setpoint to the queue" << std::endl;
 	}
 
-	if (pts.queueEmpty == false) {
+	if (pts.queueEmpty() == false) {
 		mavros_msgs::PositionTarget sp_out = pts.nextSetpoint();
-		if (sp_out != NULL) {
-			std::cout << "successfully got setpoint to the queue" << std::endl;
-			//print the info of the setpoint we just got
+		//print the info of the setpoint we just got
+		std::cout << sp_out.position << endl;
 
-		} else {
-			std::cerr << "was not successful in getting setpoint from the queue" << std::endl;
-		}
 	} else {
 		std::cerr << "cannot get sp from queue -- the queue is empty" << std::endl;
 	}
@@ -228,6 +225,14 @@ int main(void)
 
     std::cout << "Test 5:" << std::endl;
     result = test_5();
+    if ( result < 0 ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+
+    std::cout << "Test 6:" << std::endl;
+    result = test_6();
     if ( result < 0 ) {
         std::cout << "Test failed." << std::endl;
     } else {

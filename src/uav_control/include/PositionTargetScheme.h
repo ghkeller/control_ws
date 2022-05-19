@@ -34,6 +34,7 @@ class PositionTargetScheme
 	uint16_t getIgnoreFlags(void);
 	uint16_t getCoordinateFrame(void);
 	uint16_t getDelayAfterWPHit(void);
+	bool queueEmpty(void);
 
     private:
 	string name;
