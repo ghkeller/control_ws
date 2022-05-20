@@ -29,34 +29,6 @@ namespace fly_mission
 {
 
 
-void state_cb(const mavros_msgs::State::ConstPtr& msg)
-{
-    current_state = *msg;
-}
-
-void position_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
-{
-	current_pose = *msg;
-}
-
-void target_cb(const mavros_msgs::PositionTarget::ConstPtr& msg)
-{
-    current_target = *msg;
-}
-
-void gcs_alert_cb(const std_msgs::String::ConstPtr& msg)
-{
-	//parse our the message
-	std::string recv = msg->data;
-    ROS_INFO("Received message from vehicle 0: [%s]", recv.c_str());
-
-	//compare message to cases for flag setting
-    if (recv.compare("STOP") == 0) {
-    	ROS_INFO("    GCS has commanded STOP.");
-    	coll_av_flag = true;
-    	return;
-    }
-}
 
 typedef enum {INIT, ARMING, TAKING_OFF, IN_OFFBOARD, AVOIDING, HOLDING} sm_state;
 

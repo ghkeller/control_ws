@@ -4,67 +4,102 @@
 #include <iostream>
 #include <string>
 #include <cstddef>
+#include <ros/ros.h>
+#include <ros/package.h>
 
 /* local includes */
 #include "ROSMissionComponents.h"
 
+
 using namespace std;
 
-ROSMissionComponents::ROSMissionComponents(ros::NodeHandle _nh,
-		, ros::Subscriber _state_topic,
-		ros::Subscriber _pose_topic, )
+ROSMissionComponents::ROSMissionComponents(ros::NodeHandle _nh)
 {
 	// initialize ros components
-	this->getParams(_nh);
-
-	// target_pos_bub
-	this->target_pos_pub;
-
-	//topic vars
-	this->state_topic;
-	this->position_topic;
-	this->setpoint_topic; 
-
-
+	this->fetchParams(_nh);
+	this->setupPublishers(_nh);
+	this->setupSubscribers(_nh);
+	this->setupServices(_nh);
 }
 
-void ROSMissionComponents::getParams(ros::NodeHandle _nh)
+void ROSMissionComponents::fetchParams(ros::NodeHandle _nh)
 {
-    _nh.getParam(ros::this_node::getNamespace() + "/control/flight_fname", flight_fname);
-    _nh.getParam(ros::this_node::getNamespace() + "/control/avoidance", avoidance);
-    _nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_distance_hit_thresh", waypoint_distance_hit_thresh);
-    _nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_hit_wait_time", waypoint_hit_wait_time);
-    _nh.getParam(ros::this_node::getNamespace() + "/control/starting_waypoint_number", starting_waypoint_number);
-}
+	//flight/mission parameters
+    _nh.getParam(ros::this_node::getNamespace() + "/control/flight_fname", this->flight_fname);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/avoidance", this->avoidance);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_distance_hit_thresh", this->waypoint_distance_hit_thresh);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_hit_wait_time", this->waypoint_hit_wait_time);
+    _nh.getParam(ros::this_node::getNamespace() + "/control/starting_waypoint_number", this->starting_waypoint_number);
 
-void ROSMissionComponents::setTopicsAndServices(ros::NodeHandle _nh)
-{
 	//topics
-    = ros::this_node::getNamespace() + "/mavros/state";
-    = ros::this_node::getNamespace() +  "/mavros/local_position/pose";
-    = ros::this_node::getNamespace() + "/mavthread/setpoint_raw/local";
-    
-	//services
-    std::string arming_service = ros::this_node::getNamespace() + "/mavros/cmd/arming";
-    std::string set_mode_service = ros::this_node::getNamespace() + "/mavros/set_mode";
-    std::string takeoff_service = ros::this_node::getNamespace() + "/mavros/cmd/takeoff";
+    _nh.getParam(ros::this_node::getNamespace() + "/mavros/state_topic", this->state_topic);
+    _nh.getParam(ros::this_node::getNamespace() +  "/mavros/pose_topic", this->pose_topic);
+    _nh.getParam(ros::this_node::getNamespace() + "/mavros/setpoint_topic", this->setpoint_topic);
+    _nh.getParam(ros::this_node::getNamespace() + "/gcs/alert_topic", this->gcs_alert_topic);
 
+	//services
+    _nh.getParam(ros::this_node::getNamespace() + "/mavros/arming_service", this->arming_service); 
+    _nh.getParam(ros::this_node::getNamespace() + "/mavros/mode_service", this->set_mode_service);
+    _nh.getParam(ros::this_node::getNamespace() + "/mavros/takeoff_service", this->takeoff_service);
+
+}
+
+void ROSMissionComponents::setupServices(ros::NodeHandle _nh)
+{
+    this->arming_client = _nh.serviceClient<mavros_msgs::CommandBool>
+            (this->arming_service);
+    this->set_mode_client = _nh.serviceClient<mavros_msgs::SetMode>
+            (this->mode_service);
+    this->takeoff_cl = _nh.serviceClient<mavros_msgs::CommandTOL>
+    		(this->takeoff_service);
+}
+
+void ROSMissionComponents::setupSubscribers(ros::NodeHandle _nh)
+{
+    
 	//subs, pubs, etc
-    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
-            (state_topic, 10, state_cb);
-    ros::Subscriber position_sub = nh.subscribe<geometry_msgs::PoseStamped>
-            (position_topic, 10, position_cb);
-    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
-            (arming_service);
-    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
-            (set_mode_service);
-    ros::ServiceClient takeoff_cl = nh.serviceClient<mavros_msgs::CommandTOL>
-    		(takeoff_service);
-    target_pos_pub = nh.advertise<mavros_msgs::PositionTarget>
-            (setpoint_topic, 100);
+    ros::Subscriber state_sub = _nh.subscribe<mavros_msgs::State>
+            (this->state_topic, 10, state_cb);
+    ros::Subscriber position_sub = _nh.subscribe<geometry_msgs::PoseStamped>
+            (this->pose_topic, 10, pose_cb);
+    ros::Subscriber gcs_alert_sub = _nh.subscribe<std_msgs::String>
+            (this->gcs_alert_topic, 10, gcs_alert_cb);
+
+}
+
+void ROSMissionComponents::setupPublishers(ros::NodeHandle _nh)
+{
+    target_pos_pub = _nh.advertise<mavros_msgs::PositionTarget>
+            (this->setpoint_topic, 100);
                 //declare subscribers
-    ros::Subscriber gcs_alert_sub = nh.subscribe<std_msgs::String>
-            ("/gcs/vehicle_alert", 10, gcs_alert_cb);
 }
 
 
+void ROSMissionComponents::state_cb(const mavros_msgs::State::ConstPtr& msg)
+{
+    this->current_state = *msg;
+}
+
+void ROSMissionComponents::position_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
+{
+	this->current_pose = *msg;
+}
+
+void ROSMissionComponents::target_cb(const mavros_msgs::PositionTarget::ConstPtr& msg)
+{
+    this->current_target = *msg;
+}
+
+void ROSMissionComponents::gcs_alert_cb(const std_msgs::String::ConstPtr& msg)
+{
+	//parse our the message
+	std::string recv = msg->data;
+    ROS_INFO("Received message from vehicle 0: [%s]", recv.c_str());
+
+	//compare message to cases for flag setting
+    if (recv.compare("STOP") == 0) {
+    	ROS_INFO("    GCS has commanded STOP.");
+    	this->coll_av_flag = true;
+    	return;
+    }
+}
