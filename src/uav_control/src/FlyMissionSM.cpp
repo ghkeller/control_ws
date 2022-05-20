@@ -9,16 +9,27 @@ namespace fly_mission_sm
 {
 
 // constructor
-bool FlyMissionSM() {
+FlyMissionSM::FlyMissionSM() {
+	// initialize the necessary components for our state machine
+	this->current_state = INIT;
+	this->flags.state_entry = true;
+}
+
+
+InOffboardSubSM::InOffboardSubSM()
+{
+	// initialize the necessary components for our state machine
+	this->current_state = INIT;
+	this->flags.state_entry = true;
 }
 
 // main body of the state machine
-bool cycle() {
+void InOffboardSubSM::cycle() {
 	this::current_state
 
 	//sub state machine for offboard mode
 	switch (current_avoid_substate) {
-		case SUB_INIT:
+		case INIT:
 
 		if (avoid_substate_entry == true) {
 			// state entry execution
@@ -121,193 +132,8 @@ bool cycle() {
 	return false; // indicating that we are not finished with our alternate waypoints
 }
 
-void init_agent_sm(ros::NodeHandle nh)
-{
-	//configure ros node with new pubs, subs, etc.
-	//declare publishers
-	vehicle_ack_pub = nh.advertise<std_msgs::String>("/message", 100);
-    target_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("/mavthread/setpoint_position/local", 100);
-
-	//declare subscribers
-    gcs_msg_sub = nh.subscribe<std_msgs::String>
-            ("gcs/vehicle_id", 10, agent_sm::gcs_msg_cb);
-    gcs_wps_sub = nh.subscribe<std_msgs::String>
-            ("gcs/goer_wps", 100, agent_sm::gcs_wps_cb);
-    uav_pos_sub = nh.subscribe<geometry_msgs::PoseStamped>
-    		("/mavros/local_position/pose", 100, agent_sm::vehicle_position_cb);
-   	
-    //the setpoint publishing rate MUST be faster than 2Hz
-    ros::Rate rate(20.0);
-
-    //sit and spin for a second before entering state machine
-    for (int i = 0; i < 10; i++) {
-    	ros::spinOnce();
-        rate.sleep();
-    }
-
-}
-
-bool agent_sm()
-{
-//drop into state
-	switch(curr_state) {
-		case STOPPING:
-		{
-			//tell the vehicles to stop
-			if (state_entry_flag == true) {
-				ROS_INFO("------------------------v");
-				ROS_INFO("In state 'STOPPING'...");
-				ROS_INFO("    -> Entry function...");
-
-				//set the current pose as the setpoint for the vehicles
-
-				
-
-				//make sure we don't come back in
-				state_entry_flag = false;
-				ROS_INFO("    -> Exiting entry function...");
-			}
-
-			//condition to leave state
-			if (true) {
-				//acknowledge that we have stopped
-				std_msgs::String msg;
-	    		msg.data = "HALT_ACK";
-				vehicle_ack_pub.publish(msg);
-
-				//enter the next state
-				state_entry_flag = true;
-				next_state = WAITING_FOR_ID;
-				ROS_INFO("Leaving state 'STOPPING', going to 'WAITING_FOR_ID'...");
-				ROS_INFO("------------------------^");
-			}
-		}
-		break;
-
-		case WAITING_FOR_ID:
-		{
-			//tell the vehicles to stop
-			if (state_entry_flag == true) {
-				ROS_INFO("------------------------v");
-				ROS_INFO("In state 'WAITING_FOR_ID'...");
-				ROS_INFO("    -> Entry function...");
-
-				//make sure we don't come back in
-				state_entry_flag = false;
-				ROS_INFO("    -> Exiting entry function...");
-			}
-
-			//do every cycle we are in this state
-
-			if (id == STOPPER) {
-
-				//acknowledge that we have stopped
-				std_msgs::String msg;
-	    		msg.data = "ID_ACK";
-				vehicle_ack_pub.publish(msg);
-
-				//enter the next state
-				next_state = HALTING;
-				ROS_INFO("Leaving state 'WAITING_FOR_ID', going to 'HALTING'...");
-				ROS_INFO("------------------------^");
-				state_entry_flag = true;
-			}
-
-			if (id == GOER) {
-
-				//acknowledge that we have stopped
-				std_msgs::String msg;
-	    		msg.data = "ID_ACK";
-				vehicle_ack_pub.publish(msg);
-
-				//enter the next state
-				state_entry_flag = true;
-				next_state = WAITING_FOR_WPS;
-				ROS_INFO("Leaving state 'WAITING_FOR_ID', going to 'WAITING_FOR_WPS'...");
-				ROS_INFO("------------------------^");
-				state_entry_flag = true;
-			}
-		}
-		break;
-
-		case WAITING_FOR_WPS:
-		{
-			//tell the vehicles to stop
-			if (state_entry_flag == true) {
-				ROS_INFO("------------------------v");
-				ROS_INFO("In state 'WAITING_FOR_WPS'...");
-				ROS_INFO("    -> Entry function...");
-
-				//make sure we don't come back in
-				state_entry_flag = false;
-				ROS_INFO("    -> Exiting entry function...");
-			}
-
-			//do something every cycle here
-
-			if (wps_recv == true) {
-				//enter the next state
-				next_state = CIRCUMNAVIGATING;
-				ROS_INFO("Leaving state 'WAITING_FOR_WPS', going to 'CIRCUMNAVIGATING'...");
-				ROS_INFO("------------------------^");
-				state_entry_flag = true;
-			}
-
-		}
-		break;
-
-		case CIRCUMNAVIGATING:
-		{
-			//tell the vehicles to stop
-			if (state_entry_flag == true) {
-				ROS_INFO("------------------------v");
-				ROS_INFO("In state 'CIRCUMNAVIGATING'...");
-				ROS_INFO("    -> Entry function...");
-
-				//make sure we don't come back in
-				state_entry_flag = false;
-				ROS_INFO("    -> Exiting entry function...");
-			}
-
-			//do something every cycle here
-			bool finished = avoid_sub_sm(pt_vec);
-
-			if (finished == true) {
-				//exit the state machine after posting notice of finishing circumnavigation
-				std_msgs::String msg;
-	    		msg.data = "DONE_AVOIDNG";
-				vehicle_ack_pub.publish(msg);
-				ros::spinOnce();
-				ROS_INFO("Leaving avoidance subroutine");
-				ROS_INFO("------------------------^");
-				return true;
-			}
-
-		}
-		break;
 
 
-		default:
-
-		break;
-	}
-
-	curr_state = next_state;
-    ros::spinOnce();
-}
-}
-
-
-
-static sm_state current_sm_state = INIT;
-sm_state next_sm_state;
-bool state_entry = true;
-
-
-static offboard_substate current_offboard_substate = SUB_INIT;
-offboard_substate next_offboard_substate;
-bool offboard_substate_entry = true;
 
 mavros_msgs::PositionTarget desired_target;
 

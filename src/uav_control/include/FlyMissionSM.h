@@ -20,7 +20,11 @@ class FlyMissionSM
 	cycle();
 
 	private:
-	State next_state;
+	State current_state;
+	struct flags {
+		bool state_entry,
+		bool state_exit
+	} flags;
 }
 
 
