@@ -81,6 +81,7 @@ class ROSMissionComponents
 	// subscribers
 	ros::Subscriber state_sub;
 	ros::Subscriber position_sub;
+	ros::Subscriber target_sub;
 	ros::Subscriber gcs_alert_sub;
 
 	// service clients

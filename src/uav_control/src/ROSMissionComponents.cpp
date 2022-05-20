@@ -59,11 +59,13 @@ void ROSMissionComponents::setupSubscribers(ros::NodeHandle _nh)
     
 	//subs, pubs, etc
     ros::Subscriber state_sub = _nh.subscribe<mavros_msgs::State>
-            (this->state_topic, 10, state_cb);
+            (this->state_topic, 10, this->state_cb);
     ros::Subscriber position_sub = _nh.subscribe<geometry_msgs::PoseStamped>
-            (this->pose_topic, 10, pose_cb);
+            (this->pose_topic, 10, this->pose_cb);
+    ros::Subscriber target_sub = _nh.subscribe<geometry_msgs::PoseStamped>
+            (this->target_topic, 10, this->target_cb);
     ros::Subscriber gcs_alert_sub = _nh.subscribe<std_msgs::String>
-            (this->gcs_alert_topic, 10, gcs_alert_cb);
+            (this->gcs_alert_topic, 10, this->gcs_alert_cb);
 
 }
 
