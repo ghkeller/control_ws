@@ -6,7 +6,8 @@
 #include <cstddef>
 #include <iostream>
 
-#include "FlightParsing.h"
+#include "SetpointScheme.h"
+#include "Parsing.h"
 #include "mavros_msgs/PositionTarget.h"
 
 class Flight
@@ -16,5 +17,6 @@ class Flight
 	Flight(std::string);
 	
 	private:
+	PositionTargetScheme setpoint_scheme; // eventually abstract into SetpointScheme to have generality
 	bool loadFlight(std::string);
 };

@@ -14,7 +14,15 @@ LDLIBS   := -lm
 
 .PHONY: all clean
 
-all: position_target_scheme_tests flight_class_tests
+all: parsing_tests position_target_scheme_tests flight_class_tests
+
+# PARSING FLIGHT FILES TEST ---------------------------------------------
+
+parsing_tests: parsing_tests.cpp $(OBJ_DIR)/Parsing.o $(BIN_DIR)
+	g++ -o $(BIN_DIR)/parsing_tests parsing_tests.cpp $(OBJ_DIR)/Parsing.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+
+$(OBJ_DIR)/Parsing.o: $(SRC_DIR)/Parsing.cpp $(INC_DIR)/Parsing.h $(OBJ_DIR)
+	g++ -o $(OBJ_DIR)/Parsing.o -c $(SRC_DIR)/Parsing.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 # POSITION TARGET SCHEME ---------------------------------------------
 
