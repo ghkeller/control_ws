@@ -5,15 +5,14 @@
 #include <string>
 #include <cstddef>
 #include <iostream>
-#include <mavros/PositionTarget.h>
 
 #include "Flight.h"
-#include "FlightParsing.h"
+#include "mavros_msgs/PositionTarget.h"
 
 class FlightParsing
 {
 	public:
-		static flightFromCsv(std::string _path_to_CSV, Flight& _flight);
+		static void flightFromCsv(std::string _path_to_CSV, Flight& _flight);
 	
 	private:
-}
+};

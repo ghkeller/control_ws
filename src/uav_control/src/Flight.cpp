@@ -10,13 +10,17 @@ namespace fly_mission
 {
 
 // constructor
+Flight::Flight(void)
+{
+}
+
+// constructor
 Flight::Flight(std::string filename)
 {
-
 }
 
 // parse out a flight from a file
-bool Flight::load_flight(std::string filename) {
+bool Flight::loadFlight(std::string filename) {
 	//load the csv values
     std::string full_flight_fname_path = ros::package::getPath("uav_control") + "/flights/" + filename + ".csv";
     ROS_INFO(full_flight_fname_path.c_str());
