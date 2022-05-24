@@ -6,7 +6,7 @@
 #include <cstddef>
 
 /* local includes */
-#include "PositionTargetScheme.h"
+#include "SetpointScheme.h"
 #include "mavros_msgs/PositionTarget.h"
 
 // deal with this for our queue (if we need it)

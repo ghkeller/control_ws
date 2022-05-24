@@ -18,19 +18,19 @@ all: parsing_tests position_target_scheme_tests flight_class_tests
 
 # PARSING FLIGHT FILES TEST ---------------------------------------------
 
-parsing_tests: parsing_tests.cpp $(OBJ_DIR)/Parsing.o $(BIN_DIR)
-	g++ -o $(BIN_DIR)/parsing_tests parsing_tests.cpp $(OBJ_DIR)/Parsing.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+parsing_tests: parsing_tests.cpp $(OBJ_DIR)/Parsing.o $(OBJ_DIR)/SetpointScheme.o $(BIN_DIR)
+	g++ -o $(BIN_DIR)/parsing_tests parsing_tests.cpp $(OBJ_DIR)/Parsing.o $(OBJ_DIR)/SetpointScheme.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 $(OBJ_DIR)/Parsing.o: $(SRC_DIR)/Parsing.cpp $(INC_DIR)/Parsing.h $(OBJ_DIR)
 	g++ -o $(OBJ_DIR)/Parsing.o -c $(SRC_DIR)/Parsing.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 # POSITION TARGET SCHEME ---------------------------------------------
 
-position_target_scheme_tests: position_target_scheme_test.cpp $(OBJ_DIR)/PositionTargetScheme.o $(BIN_DIR)
-	g++ -o $(BIN_DIR)/positon_target_scheme_tests position_target_scheme_test.cpp $(OBJ_DIR)/PositionTargetScheme.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+position_target_scheme_tests: position_target_scheme_test.cpp $(OBJ_DIR)/SetpointScheme.o $(BIN_DIR)
+	g++ -o $(BIN_DIR)/positon_target_scheme_tests position_target_scheme_test.cpp $(OBJ_DIR)/SetpointScheme.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
-$(OBJ_DIR)/PositionTargetScheme.o: $(SRC_DIR)/PositionTargetScheme.cpp $(INC_DIR)/PositionTargetScheme.h $(OBJ_DIR)
-	g++ -o $(OBJ_DIR)/PositionTargetScheme.o -c $(SRC_DIR)/PositionTargetScheme.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+$(OBJ_DIR)/SetpointScheme.o: $(SRC_DIR)/SetpointScheme.cpp $(INC_DIR)/SetpointScheme.h $(OBJ_DIR)
+	g++ -o $(OBJ_DIR)/SetpointScheme.o -c $(SRC_DIR)/SetpointScheme.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 # FLIGHT CLASS --------------------------------------------------------
 

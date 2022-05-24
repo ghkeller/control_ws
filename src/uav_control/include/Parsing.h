@@ -6,13 +6,11 @@
 #include <cstddef>
 #include <iostream>
 
-#include "Flight.h"
-#include "mavros_msgs/PositionTarget.h"
+#include "SetpointScheme.h"
 
-class FlightParsing
+class Parsing
 {
 	public:
-		static void flightFromCsv(std::string _path_to_CSV, Flight& _flight);
-	
+		static bool flightFromCsv(std::string, PositionTargetScheme&);
 	private:
 };

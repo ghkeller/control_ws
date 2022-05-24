@@ -7,6 +7,7 @@
 #include <cstddef>
 
 #include "Parsing.h"
+#include "SetpointScheme.h"
 
 using namespace std;
 
@@ -14,20 +15,21 @@ namespace parsing_tests
 {
 
 int test_1(void) {
-    std::cout << "Test 1: parsing a correct file." << std::endl;
+    cout << "Test 1: parsing a correct file." << endl;
 
 	string home_str;
-	const char* temp = getenv("$HOME");
+	const char* temp = getenv("HOME");
 	if (temp == NULL) {
 		cerr << "Could not get $HOME env variable value." << endl;
 	} else {
 		home_str = string(temp);	
 	}
-	string fname = "$HOME/control_ws/flights/good_flight.csv"
+	string fname = home_str.append("/control_ws/flights/good_flight.csv");
 
+	// instantiate a setpoint scheme object to populate with setpoints
+	PositionTargetScheme pts = PositionTargetScheme();
 
-
-	bool ret_val = Parsing::flightFromCSV(fname);
+	bool ret_val = Parsing::flightFromCsv(fname, pts);
 	if (!ret_val) {
 		std::cerr << "Error parsing the flight file which should be correct." << std::endl;
 		return -1;

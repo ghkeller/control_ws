@@ -3,146 +3,163 @@
 #include <string>
 #include <cstddef>
 #include <iostream>
+#include <fstream>
 
 #include "Flight.h"
 #include "Parsing.h"
 #include "SetpointScheme.h"
 
-// constructor
-static void FlightParsing::flightFromCsv(std::string _path_to_CSV, PositionTargetScheme& pts)
+
+using namespace std;
+
+// static parsing func
+bool Parsing::flightFromCsv(string _path_to_CSV, PositionTargetScheme& pts)
 {
-	std::ifstream data(_path_to_CSV);
-    std::string line;
-    while(std::getline(data,line)) {
+	bool success_flag = true;
+
+	// prepare data stream to parse
+	ifstream data(_path_to_CSV);
+
+	// check to see if the flight file exists
+	if(!data.is_open()){
+		std::cout << "File not found" << std::endl;
+		return false;
+	}
+
+	// parse by line in the file, starting on the second line
+    string line;
+    while(getline(data,line)) {
     	try {
-	        std::stringstream lineStream(line);
-	        std::string cell;
+	        stringstream lineStream(line);
+	        string cell;
 	        mavros_msgs::PositionTarget tp;
 
 	        tp.coordinate_frame = mavros_msgs::PositionTarget::FRAME_LOCAL_NED;
 
 	        //px
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.position.x = std::stof(cell);
-	        	ROS_INFO("Parsed px");
+	        	tp.position.x = stof(cell);
+	        	cout << "Parsed px" << endl;
+
 	        } else {
 	        	tp.position.x = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_PX;
 	        }
 
 	        //py
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.position.y = std::stof(cell);
-	        	ROS_INFO("Parsed py");
+	        	tp.position.y = stof(cell);
+	        	cout << "Parsed py" << endl;
 	        } else {
 	        	tp.position.y = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_PY;
 	        }
 
 	        //pz
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.position.z = std::stof(cell);
-	        	ROS_INFO("Parsed pz");
+	        	tp.position.z = stof(cell);
+	        	cout << "Parsed pz" << endl;
 	        } else {
 	        	tp.position.z = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_PZ;
 	        }
 
 	        //ax
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.acceleration_or_force.x = std::stof(cell);
-	        	ROS_INFO("Parsed ax");
+	        	tp.acceleration_or_force.x = stof(cell);
+	        	cout << "Parsed ax" << endl;
 	        } else {
 	        	tp.acceleration_or_force.x = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_AFX;
 	        }
 
 	        //ay
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.acceleration_or_force.y = std::stof(cell);
-	        	ROS_INFO("Parsed ay");
+	        	tp.acceleration_or_force.y = stof(cell);
+	        	cout << "Parsed ay" << endl;
 	        } else {
 	        	tp.acceleration_or_force.y = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_AFY;
 	        }
 
 	        //az
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.acceleration_or_force.z = std::stof(cell);
-	        	ROS_INFO("Parsed az");
+	        	tp.acceleration_or_force.z = stof(cell);
+	        	cout << "Parsed az" << endl;
 	        } else {
 	        	tp.acceleration_or_force.z = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_AFZ;
 	        }
 
 	       	//vx
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.velocity.x = std::stof(cell);
-	        	ROS_INFO("Parsed vx");
+	        	tp.velocity.x = stof(cell);
+	        	cout << "Parsed vx" << endl;
 	        } else {
 	        	tp.velocity.x = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_VX;
 	        }
 
 	        //vy
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.velocity.y = std::stof(cell);
-	        	ROS_INFO("Parsed vy");
+	        	tp.velocity.y = stof(cell);
+	        	cout << "Parsed vy" << endl;
 	        } else {
 	        	tp.velocity.y = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_VY;
 	        }
 
 	        //vz
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.velocity.z = std::stof(cell);
-	        	ROS_INFO("Parsed vz");
+	        	tp.velocity.z = stof(cell);
+	        	cout << "Parsed vz" << endl;
 	        } else {
 	        	tp.velocity.z = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_VZ;
 	        }
 
 	        //yaw
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.yaw = std::stof(cell);
-	        	ROS_INFO("Parsed yaw");
+	        	tp.yaw = stof(cell);
+	        	cout << "Parsed yaw" << endl;
 	        } else {
 	        	tp.yaw = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_YAW;
 	        }
 
 	        //yaw
-	        std::getline(lineStream,cell,',');
+	        getline(lineStream,cell,',');
 	        if (!cell.empty()) {
-	        	tp.yaw_rate = std::stof(cell);
-	        	ROS_INFO("Parsed yaw rate");
+	        	tp.yaw_rate = stof(cell);
+	        	cout << "Parsed yaw rate" << endl;
 	        } else {
 	        	tp.yaw_rate = 0.0f;
 	        	tp.type_mask |= mavros_msgs::PositionTarget::IGNORE_YAW_RATE;
 	        }
 
 	        //save the position target struct to our vector
-    		pts->addSetpointToQueue(tp);
-    		ROS_INFO("Added position target to vector");
+    		pts.addSetpointToQueue(tp);
+    		cout << "Added position target to vector" << endl;
 	    }
 
 	    catch (...)  { 
-        	ROS_INFO("Error parsing line of csv. Moving on to next line...");
+        	cout << "Error parsing line of csv. Moving on to next line. .."<< endl;
+			success_flag = false;
     	} 
     }
 
-    ROS_INFO("Finished parsing csv file.");
-    return true;
-	return;
+    cout << "Finished parsing csv file. "<< endl;
+
+	return success_flag; // need to return a failure or success
 }
 
