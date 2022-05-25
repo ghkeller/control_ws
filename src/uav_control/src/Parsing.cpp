@@ -8,6 +8,7 @@
 #include "Flight.h"
 #include "Parsing.h"
 #include "SetpointScheme.h"
+#include "mavros_msgs/PositionTarget.h"
 
 
 using namespace std;
@@ -22,13 +23,16 @@ bool Parsing::flightFromCsv(string _path_to_CSV, PositionTargetScheme& pts)
 
 	// check to see if the flight file exists
 	if(!data.is_open()){
-		std::cout << "File not found" << std::endl;
+		std::cout << "File not found at path: " << _path_to_CSV << std::endl;
 		return false;
 	}
 
 	// parse by line in the file, starting on the second line
     string line;
+	getline(data,line); // here's where we throw away the first line
     while(getline(data,line)) {
+		// should quantify the number of cells to verify that the file was created
+		// properly prior to parsing -- do this later.
     	try {
 	        stringstream lineStream(line);
 	        string cell;
