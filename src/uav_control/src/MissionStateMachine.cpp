@@ -3,7 +3,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/PoseStamped.h>
 
-#include "FlyMissionSM.h"
+#include "MissionStateMachine.h"
 
 // constructor
 FlyMissionSM::FlyMissionSM() {

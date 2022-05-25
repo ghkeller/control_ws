@@ -7,7 +7,7 @@
 
 /* local includes */
 
-class FlyMissionSM
+class MissionStateMachine.h
 {
 	public:
 	// constructor
@@ -27,7 +27,7 @@ class FlyMissionSM
 	} flags;
 }
 
-
+/*
 class InOffboardSubSM
 {
 	public:
@@ -43,3 +43,4 @@ class InOffboardSubSM
 	private:
 	State next_state;
 }
+*/
