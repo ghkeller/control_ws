@@ -18,6 +18,7 @@ class PositionTargetScheme
     PositionTargetScheme();
 
 	/* methods */
+	int getSetpointQueueSize(void);
 	bool addSetpointToQueue(mavros_msgs::PositionTarget);
 	bool cycleSPStateMachine();
 	mavros_msgs::PositionTarget nextSetpoint();

@@ -25,12 +25,13 @@ Flight::Flight(std::string filename)
 	this->setpoint_scheme = PositionTargetScheme();
 
 	// read in the flight
-	loadFlight(filename, this->setpoint_scheme);
+	load(filename);
 }
 
 // parse out a flight from a file
-bool Flight::loadFlight(std::string filename, PositionTargetScheme& pts) {
-	bool ret_val = Parsing::flightFromCSV(filename, pts);
+bool Flight::load(std::string filename) {
+	// setpoint scheme must be instantiated before we attempt to load a flight
+	bool ret_val = Parsing::flightFromCSV(filename, this->setpoint_scheme);
 	if (!ret_val)
 	{
 		std::cerr << "flightFromCSV failed." std::endl;

@@ -1,17 +1,15 @@
-// position_target_scheme_test.cpp: test suite for the interfacing with 
-// MAVLink APIs
+// mission_state_machine_tests.cpp: test suite for the primary state machine
 
 /* system includes */
 #include <iostream>
 #include <string>
 #include <cstddef>
 
-#include "Parsing.h"
-#include "SetpointScheme.h"
+#include "MissionStateMachine.h"
 
 using namespace std;
 
-namespace parsing_tests
+namespace mission_state_machine_tests
 {
 
 int test_1(void) {
@@ -97,10 +95,11 @@ int test_3(void) {
 	
 }
 
-} //namespace parsing_tests END
+} //namespace mission_state_machine_tests END
 
-using namespace parsing_tests;
+using namespace mission_state_machine_tests;
 
+//* this testing suite should enter every 
 int main(void)
 {
     int result; // stores the results of the test
@@ -109,23 +108,6 @@ int main(void)
 
     std::cout << "Test 1:" << std::endl;
     result = test_1();
-    if ( result < 0 ) {
-        std::cout << "Test failed." << std::endl;
-    } else {
-        std::cout << "Test succeeded." << std::endl;
-    }
-
-
-    std::cout << "Test 2:" << std::endl;
-    result = test_2();
-    if ( result < 0 ) {
-        std::cout << "Test failed." << std::endl;
-    } else {
-        std::cout << "Test succeeded." << std::endl;
-    }
-
-    std::cout << "Test 3:" << std::endl;
-    result = test_3();
     if ( result < 0 ) {
         std::cout << "Test failed." << std::endl;
     } else {

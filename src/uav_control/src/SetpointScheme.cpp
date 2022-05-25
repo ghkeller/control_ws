@@ -76,6 +76,11 @@ mavros_msgs::PositionTarget PositionTargetScheme::nextSetpoint(void)
 	return ret_pt;
 }
 
+int PositionTargetScheme::getSetpointQueueSize(void)
+{
+	return this->setpoint_queue.size();
+}
+
 
 bool PositionTargetScheme::addSetpointToQueue(mavros_msgs::PositionTarget sp)
 {

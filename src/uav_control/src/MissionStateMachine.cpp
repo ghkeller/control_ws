@@ -5,9 +5,6 @@
 
 #include "FlyMissionSM.h"
 
-namespace fly_mission_sm
-{
-
 // constructor
 FlyMissionSM::FlyMissionSM() {
 	// initialize the necessary components for our state machine
