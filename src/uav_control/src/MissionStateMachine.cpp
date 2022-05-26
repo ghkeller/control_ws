@@ -5,6 +5,8 @@
 
 #include "MissionStateMachine.h"
 
+using namespace std;
+
 // constructor
 MissionStateMachine::MissionStateMachine() {
 	// initialize the necessary components for our state machine
@@ -17,6 +19,48 @@ MissionStateMachine::State MissionStateMachine::getCurrentState(void)
 {
 	return this->current_state;
 }
+
+void MissionStateMachine::cycle(void)
+{
+
+	State next_state;
+
+	switch (this->current_state) {
+
+		case State::INIT:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			cout << "In state 'INIT'..." << endl;
+			this->flags.state_entry = false;
+		}
+
+		// STATE TRANSFER CONDITIONS 
+		// only cycle through the init state once
+
+		if (true) {
+			cout << "Next state will be 'CHECKING_PREARM'..." << endl;
+			next_state = State::CHECKING_PREARM;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			cout << "Exiting 'INIT'..." << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
+		default:
+
+		break;
+	}
+
+	this->current_state = next_state;
+}
+
+
 
 /*
 InOffboardSubSM::InOffboardSubSM()

@@ -16,7 +16,7 @@ class MissionStateMachine
 	MissionStateMachine();
 
 	// defining states
-	enum class State {INIT, ARMING, TAKING_OFF, IN_OFFBOARD, AVOIDING, HOLDING};
+	enum class State {INIT, CHECKING_PREARM, ARMING, TAKING_OFF, IN_OFFBOARD, AVOIDING, HOLDING};
 
 	// main execution
 	void cycle();
@@ -28,7 +28,7 @@ class MissionStateMachine
 
 	private:
 	State current_state;
-	struct flags {
+	struct transition_flags {
 		bool state_entry;
 		bool state_exit;
 	} flags;
