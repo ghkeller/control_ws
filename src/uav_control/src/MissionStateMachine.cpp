@@ -6,13 +6,19 @@
 #include "MissionStateMachine.h"
 
 // constructor
-FlyMissionSM::FlyMissionSM() {
+MissionStateMachine::MissionStateMachine() {
 	// initialize the necessary components for our state machine
-	this->current_state = INIT;
+	this->current_state = State::INIT;
 	this->flags.state_entry = true;
 }
 
 
+MissionStateMachine::State MissionStateMachine::getCurrentState(void)
+{
+	return this->current_state;
+}
+
+/*
 InOffboardSubSM::InOffboardSubSM()
 {
 	// initialize the necessary components for our state machine
@@ -36,7 +42,7 @@ void InOffboardSubSM::cycle() {
 		}
 
 
-		/* STATE TRANSFER CONDITIONS */
+		// STATE TRANSFER CONDITIONS 
 		// only cycle through the init state once
 		if (true) {
 			ROS_INFO("Going to state 'SETTING_TARGET'...");
@@ -75,7 +81,7 @@ void InOffboardSubSM::cycle() {
         ros::spinOnce();
 
 
-		/* STATE TRANSFER CONDITIONS */
+		// STATE TRANSFER CONDITIONS 
 		 //we only want to send the target value once to the handling thread
 		 if (true) {
 		 	ROS_INFO("Going to state 'CYCLING'...");
@@ -98,7 +104,7 @@ void InOffboardSubSM::cycle() {
 
 		pt_reached_flag = pt_reached();
 
-		/* STATE TRANSFER CONDITIONS */
+		// STATE TRANSFER CONDITIONS
 		// when we've reached the waypoint, we should transfer to setting or leaving
 		if (pt_reached_flag == true && vec_iterator > 3) {
 			ROS_INFO("Finished traversing alternate waypoints");
@@ -151,7 +157,7 @@ void offboard_sub_sm(void) {
 		}
 
 
-		/* STATE TRANSFER CONDITIONS */
+		// STATE TRANSFER CONDITIONS
 		// only cycle through the init state once
 		if (true) {
 			ROS_INFO("Going to state 'SETTING_TARGET'...");
@@ -199,7 +205,7 @@ void offboard_sub_sm(void) {
         ros::spinOnce();
 
 
-		/* STATE TRANSFER CONDITIONS */
+		// STATE TRANSFER CONDITIONS 
 		 //we only want to send the target value once to the handling thread
 		 if (true) {
 		 	ROS_INFO("Going to state 'CYCLING'...");
@@ -220,7 +226,7 @@ void offboard_sub_sm(void) {
 			offboard_substate_entry = false;
 		}
 
-		/* STATE TRANSFER CONDITIONS */
+		// STATE TRANSFER CONDITIONS
 		// when we've reached the waypoint, we should transfer to waiting
 		if (ros::Time::now() - last_request > ros::Duration(vec_time.at(vec_iterator - 1))) {
 			ROS_INFO("Going to state 'SETTING_TARGET'...");
@@ -237,3 +243,4 @@ void offboard_sub_sm(void) {
 
 	current_offboard_substate = next_offboard_substate;
 }
+*/

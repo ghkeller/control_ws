@@ -7,25 +7,32 @@
 
 /* local includes */
 
-class MissionStateMachine.h
+using namespace std;
+
+class MissionStateMachine
 {
 	public:
 	// constructor
-	FlyMissionSM();
+	MissionStateMachine();
 
 	// defining states
-	enum Class State {INIT, ARMING, TAKING_OFF, IN_OFFBOARD, AVOIDING, HOLDING};
+	enum class State {INIT, ARMING, TAKING_OFF, IN_OFFBOARD, AVOIDING, HOLDING};
 
 	// main execution
-	cycle();
+	void cycle();
+
+	//getters
+	State getCurrentState(void);
+
+	//setters
 
 	private:
 	State current_state;
 	struct flags {
-		bool state_entry,
-		bool state_exit
+		bool state_entry;
+		bool state_exit;
 	} flags;
-}
+};
 
 /*
 class InOffboardSubSM
