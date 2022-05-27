@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstddef>
+#include <queue>
 
 /* local includes */
 
@@ -15,19 +16,24 @@ class MissionStateMachine
 	// constructor
 	MissionStateMachine();
 
-	// defining states
+	// defining enums
 	enum class State {INIT, CHECKING_PREARM, ARMING, TAKING_OFF, IN_OFFBOARD, AVOIDING, HOLDING};
+	enum class Event {CHECKS_PREARM_COMPLETE, NO_EVENT};
 
-	// main execution
+	// main execution and state machine interfacing
 	void cycle();
+	Event checkEvents();
+	void registerEvent(Event);
 
 	//getters
 	State getCurrentState(void);
 
 	//setters
+	void setCurrentState(State);
 
 	private:
 	State current_state;
+	queue<Event> event_queue;
 	struct transition_flags {
 		bool state_entry;
 		bool state_exit;

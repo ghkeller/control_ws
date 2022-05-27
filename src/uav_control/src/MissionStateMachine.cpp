@@ -20,10 +20,36 @@ MissionStateMachine::State MissionStateMachine::getCurrentState(void)
 	return this->current_state;
 }
 
+
+MissionStateMachine::Event MissionStateMachine::checkEvents()
+{
+	// get event from the front of the FIFO buffer (replace with priority buffer in future?)
+	Event event;
+
+	// if no events, return NO_EVENT
+	if (this->event_queue.empty()) {
+		return Event::NO_EVENT;
+	} 
+
+	// pop and return the event
+	event = this->event_queue.front();
+	this->event_queue.pop();
+	return event;
+}
+
+void MissionStateMachine::registerEvent(MissionStateMachine::Event event)
+{
+	// add the event to the queue
+	this->event_queue.push(event);
+}
+
 void MissionStateMachine::cycle(void)
 {
 
 	State next_state;
+
+	// check for events
+	Event event = this->checkEvents();
 
 	switch (this->current_state) {
 
@@ -51,6 +77,53 @@ void MissionStateMachine::cycle(void)
 		}
 
 		break;
+
+		case State::CHECKING_PREARM:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			cout << "In state 'CHECKING_PREARM'..." << endl;
+			this->flags.state_entry = false;
+		}
+
+		// STATE TRANSFER CONDITIONS 
+		// here, we wait until the system is done checking that everything which
+		// should be done prior to arming has been completed
+
+		if (event == Event::CHECKS_PREARM_COMPLETE) {
+			cout << "Prearming checks have completed." << endl;
+			cout << "Next state will be 'ARMING'..." << endl;
+			next_state = State::ARMING;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			cout << "Exiting 'CHECKING_PREARM'..." << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
+		case State::ARMING:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			cout << "In state 'ARMING'..." << endl;
+			this->flags.state_entry = false;
+		}
+
+		// STATE TRANSFER CONDITIONS 
+		// to do
+
+		if (this->flags.state_exit == true) {
+			cout << "Exiting 'ARMING'..." << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
 
 		default:
 
