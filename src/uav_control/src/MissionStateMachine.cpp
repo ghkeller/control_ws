@@ -5,7 +5,25 @@
 
 #include "MissionStateMachine.h"
 
+#define DEBUG
+
+#define BLACK 30
+#define RED 31
+#define GREEN 32
+#define YELLOW 33
+#define BLUE 34
+#define MAGENTA 35
+#define CYAN 36
+#define WHITE 37
+
 using namespace std;
+
+void debugOut(string str, int color_code)
+{
+#ifdef DEBUG
+	cout << "\033[1;" << color_code << "m" << str << "\033[0m\n";
+#endif
+}
 
 // constructor
 MissionStateMachine::MissionStateMachine() {
@@ -57,7 +75,7 @@ void MissionStateMachine::cycle(void)
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
-			cout << "In state 'INIT'..." << endl;
+			debugOut("	In state 'INIT'...", BLUE);
 			this->flags.state_entry = false;
 		}
 
@@ -65,13 +83,14 @@ void MissionStateMachine::cycle(void)
 		// only cycle through the init state once
 
 		if (true) {
-			cout << "Next state will be 'CHECKING_PREARM'..." << endl;
+			debugOut("	Next state will be 'CHECKING_PREARM'...", CYAN);
 			next_state = State::CHECKING_PREARM;
 			this->flags.state_exit = true;
 		}
 
 		if (this->flags.state_exit == true) {
-			cout << "Exiting 'INIT'..." << endl;
+			debugOut("	Exiting 'INIT'...", MAGENTA);
+			cout << endl;
 			this->flags.state_exit = false;
 			this->flags.state_entry = true;
 		}
@@ -82,7 +101,7 @@ void MissionStateMachine::cycle(void)
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
-			cout << "In state 'CHECKING_PREARM'..." << endl;
+			debugOut("	In state 'CHECKING_PREARM'...", BLUE);
 			this->flags.state_entry = false;
 		}
 
@@ -91,14 +110,15 @@ void MissionStateMachine::cycle(void)
 		// should be done prior to arming has been completed
 
 		if (event == Event::CHECKS_PREARM_COMPLETE) {
-			cout << "Prearming checks have completed." << endl;
-			cout << "Next state will be 'ARMING'..." << endl;
+			debugOut("	Prearming checks have completed.", YELLOW);
+			debugOut("	Next state will be 'ARMING'...", CYAN);
 			next_state = State::ARMING;
 			this->flags.state_exit = true;
 		}
 
 		if (this->flags.state_exit == true) {
-			cout << "Exiting 'CHECKING_PREARM'..." << endl;
+			debugOut("	Exiting 'CHECKING_PREARM'...", MAGENTA);
+			cout << endl;
 			this->flags.state_exit = false;
 			this->flags.state_entry = true;
 		}
@@ -109,7 +129,7 @@ void MissionStateMachine::cycle(void)
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
-			cout << "In state 'ARMING'..." << endl;
+			debugOut("	In state 'ARMING'...", BLUE);
 			this->flags.state_entry = false;
 		}
 
@@ -117,7 +137,8 @@ void MissionStateMachine::cycle(void)
 		// to do
 
 		if (this->flags.state_exit == true) {
-			cout << "Exiting 'ARMING'..." << endl;
+			debugOut("	Exiting 'ARMING'...", MAGENTA);
+			cout << endl;
 			this->flags.state_exit = false;
 			this->flags.state_entry = true;
 		}
@@ -126,6 +147,9 @@ void MissionStateMachine::cycle(void)
 
 
 		default:
+		
+		debugOut("ERROR: dropped into default state -- state machine has lost state!", RED);
+		cout << endl;
 
 		break;
 	}
