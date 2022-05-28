@@ -5,6 +5,7 @@
 #include <string>
 #include <cstddef>
 #include <queue>
+#include <map>
 
 /* local includes */
 
@@ -18,7 +19,10 @@ class MissionStateMachine
 
 	// defining enums
 	enum class State {INIT, CHECKING_PREARM, ARMING, TAKING_OFF, IN_OFFBOARD, AVOIDING, HOLDING};
-	enum class Event {CHECKS_PREARM_COMPLETE, NO_EVENT};
+	enum class Event {CHECKS_PREARM_COMPLETE, AIRCRAFT_ARMED, NO_EVENT};
+
+	// mappings for names
+	map<State, string> state_map;
 
 	// main execution and state machine interfacing
 	void cycle();

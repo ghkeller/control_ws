@@ -30,12 +30,24 @@ MissionStateMachine::MissionStateMachine() {
 	// initialize the necessary components for our state machine
 	this->current_state = State::INIT;
 	this->flags.state_entry = true;
+	this->flags.state_exit = false;
+
+	// state name string access
+	this->state_map[State::INIT] = "INIT";
+	this->state_map[State::CHECKING_PREARM] = "CHECKING_PREARM";
+	this->state_map[State::ARMING] = "ARMING";
 }
 
 
 MissionStateMachine::State MissionStateMachine::getCurrentState(void)
 {
 	return this->current_state;
+}
+
+
+void MissionStateMachine::setCurrentState(MissionStateMachine::State state)
+{
+	this->current_state = state;
 }
 
 
@@ -64,7 +76,7 @@ void MissionStateMachine::registerEvent(MissionStateMachine::Event event)
 void MissionStateMachine::cycle(void)
 {
 
-	State next_state;
+	State next_state = this->current_state;
 
 	// check for events
 	Event event = this->checkEvents();
@@ -134,10 +146,37 @@ void MissionStateMachine::cycle(void)
 		}
 
 		// STATE TRANSFER CONDITIONS 
-		// to do
+		// when the system finishes arming, transition into takeoff
+		if (event == Event::AIRCRAFT_ARMED) {
+			debugOut("	Aricraft is now armed.", YELLOW);
+			debugOut("	Next state will be 'TAKING_OFF'...", CYAN);
+			next_state = State::TAKING_OFF;
+			this->flags.state_exit = true;
+		}
+
 
 		if (this->flags.state_exit == true) {
 			debugOut("	Exiting 'ARMING'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
+		case State::TAKING_OFF:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'TAKING_OFF'...", BLUE);
+			this->flags.state_entry = false;
+		}
+
+		// STATE TRANSFER CONDITIONS 
+		// to do
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'TAKING_OFF'...", MAGENTA);
 			cout << endl;
 			this->flags.state_exit = false;
 			this->flags.state_entry = true;
