@@ -141,10 +141,34 @@ bool test_6(void) {
 
 	// cycle the machine to consume the event, and we should transition into the takeoff state
 	state_machine.cycle();
+	state_machine.cycle();
 
 	// check to make sure that we will now transition into ARMING
 	MissionStateMachine::State state = state_machine.getCurrentState();
 	return assert_eq(state, MissionStateMachine::State::TAKING_OFF, "Checking that we have transitioned into the TAKING_OFF state");
+}
+
+bool test_7(void) {
+    cout << "Test 7: transitioning out of TAKEOFF, into IN_OFFBOARD" << endl;
+
+	// instantiate the state machine
+	MissionStateMachine state_machine = MissionStateMachine();
+	state_machine.setCurrentState(MissionStateMachine::State::TAKING_OFF);
+
+	// cycling the state machine once to make sure we've actually dropped into that state
+	// this should show debug output as evidence of this 
+	state_machine.cycle();
+
+	// register that we are now armed
+	state_machine.registerEvent(MissionStateMachine::Event::TAKEOFF_COMPLETE);
+
+	// cycle the machine to consume the event, and we should transition into the takeoff state
+	state_machine.cycle();
+	state_machine.cycle();
+
+	// check to make sure that we will now transition into ARMING
+	MissionStateMachine::State state = state_machine.getCurrentState();
+	return assert_eq(state, MissionStateMachine::State::IN_OFFBOARD, "Checking that we have transitioned into the IN_OFFBOARD state");
 }
 
 } // namespace mission_state_machine_tests END
@@ -219,9 +243,6 @@ int main(void)
         std::cout << "Test succeeded." << std::endl;
     }
 	std::cout << std::endl;
-
-
-
 
 }
 

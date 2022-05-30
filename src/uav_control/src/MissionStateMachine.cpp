@@ -173,7 +173,14 @@ void MissionStateMachine::cycle(void)
 		}
 
 		// STATE TRANSFER CONDITIONS 
-		// to do
+		// once takeoff is finished, we can run the mission
+		if (event == Event::TAKEOFF_COMPLETE) {
+			debugOut("	Takeoff altitude has been reached -- takeoff is now complete.", YELLOW);
+			debugOut("	Next state will be 'IN_OFFBOARD'...", CYAN);
+			next_state = State::IN_OFFBOARD;
+			this->flags.state_exit = true;
+		}
+
 
 		if (this->flags.state_exit == true) {
 			debugOut("	Exiting 'TAKING_OFF'...", MAGENTA);
@@ -184,6 +191,124 @@ void MissionStateMachine::cycle(void)
 
 		break;
 
+		case State::IN_OFFBOARD:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'IN_OFFBOARD'...", BLUE);
+			this->flags.state_entry = false;
+		}
+
+		// SUB-SM
+
+		// STATE TRANSFER CONDITIONS 
+		// once takeoff is finished, we can run the mission
+		if (event == Event::OFFBOARD_MISSION_COMPLETE) {
+			debugOut("	Mission completed.", YELLOW);
+			debugOut("	Next state will be 'RETURNING_TO_HOME'...", CYAN);
+			next_state = State::RETURNING_TO_HOME;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'TAKING_OFF'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
+		case State::RETURNING_TO_HOME:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'RETURNING_TO_HOME'...", BLUE);
+			this->flags.state_entry = false;
+		}
+
+		// SUB-SM
+
+		// STATE TRANSFER CONDITIONS 
+		// once takeoff is finished, we can run the mission
+		if (event == Event::REACHED_HOME_COORDS) {
+			debugOut("	Got pack to the lat/lon for home.", YELLOW);
+			debugOut("	Next state will be 'LANDING'...", CYAN);
+			next_state = State::LANDING;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'RETURNING_TO_HOME'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
+		case State::LANDING:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'LANDING'...", BLUE);
+			this->flags.state_entry = false;
+		}
+
+		// STATE TRANSFER CONDITIONS 
+		// once takeoff is finished, we can run the mission
+		if (event == Event::TOUCHED_DOWN) {
+			debugOut("	We've landed.", YELLOW);
+			debugOut("	Next state will be 'DISARMING'...", CYAN);
+			next_state = State::DISARMING;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'LANDING'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
+		case State::DISARMING:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'DISARMING'...", BLUE);
+			this->flags.state_entry = false;
+		}
+
+		// STATE TRANSFER CONDITIONS 
+		// once takeoff is finished, we can run the mission
+		if (event == Event::DISARMED) {
+			debugOut("	We've disarmed.", YELLOW);
+			debugOut("	Next state will be 'EXIT'...", CYAN);
+			next_state = State::EXIT;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'DISARMING'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
+
+		case State::EXIT:
+		
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'EXIT'...", BLUE);
+			this->flags.state_entry = false;
+		}
+
+		break;
 
 		default:
 		
