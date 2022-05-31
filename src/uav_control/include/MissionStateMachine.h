@@ -11,6 +11,12 @@
 
 using namespace std;
 
+//helper class: Timer
+class Timer
+{
+
+}
+
 class MissionStateMachine
 {
 	public:
@@ -44,20 +50,37 @@ class MissionStateMachine
 	} flags;
 };
 
-/*
-class InOffboardSubSM
+
+class InOffboardStateMachine
 {
 	public:
 	// constructor
-	InOffboardSubSM();
+	InOffboardStateMachine();
 
 	// defining states
-	enum Class state {SUB_INIT, SETTING_TARGET, CYCLING} offboard_substate;
+	enum class state {INIT, SETTING_TARGET, CYCLING, STALLING_POST_WP_HIT}; 
+	enum class Event {WAYPOINT_HIT, POST_WP_HIT_TIMER_STARTED, POST_WP_HIT_TIMER_FINISHED};
 
-	// main execution
-	cycle();
+	// mappings for names
+	map<State, string> state_map;
+
+	// main execution and state machine interfacing
+	void cycle();
+	Event checkEvents();
+	void registerEvent(Event);
+
+	//getters
+	State getCurrentState(void);
+
+	//setters
+	void setCurrentState(State);
 
 	private:
-	State next_state;
+	Timer waypoint_hit_stall_timer;
+	State current_state;
+	queue<Event> event_queue;
+	struct transition_flags {
+		bool state_entry;
+		bool state_exit;
+	} flags;
 }
-*/

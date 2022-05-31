@@ -310,6 +310,17 @@ bool test_12(void) {
 	return assert_eq(state, MissionStateMachine::State::EXIT, "Checking that we have transitioned through the whole state machine.");
 }
 
+
+bool test_13(void) {
+    cout << "Test 13: initialize the sub-state machine for the offboard state" << endl;
+
+	// instantiate the state machine without pre-setting state
+	InOffboardStateMachine offboard_state_machine = InOffboardStateMachine();
+
+	// check to make sure that we start in init
+	InOffboardStateMachine::State state = offboard_state_machine.getCurrentState();
+	return assert_eq(state, InOffboardStateMachine::State::INIT, "Check to make sure we start in the init state");
+}
 } // namespace mission_state_machine_tests END
 
 using namespace mission_state_machine_tests;
@@ -421,6 +432,15 @@ int main(void)
 
     std::cout << "Test 12:" << std::endl;
     result = test_12();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
+
+    std::cout << "Test 13:" << std::endl;
+    result = test_13();
     if ( result == false ) {
         std::cout << "Test failed." << std::endl;
     } else {
