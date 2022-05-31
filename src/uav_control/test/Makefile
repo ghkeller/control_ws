@@ -7,14 +7,22 @@ BIN_DIR := bin
 #SRC := $(wildcard $(SRC_DIR)/*.cpp)
 #OBJ := $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-CXXFLAGS := -Iinclude -I/opt/ros/melodic/include -I$(HOME)/catkin_ws/devel/include 
+CXXFLAGS := -Iinclude -I/opt/ros/melodic/include -I$(HOME)/catkin_ws/devel/include
 CFLAGS   := -Wall
 LDFLAGS  := -Llib
 LDLIBS   := -lm
 
 .PHONY: all clean
 
-all: parsing_tests position_target_scheme_tests flight_class_tests
+all: timer_tests parsing_tests position_target_scheme_tests flight_class_tests
+
+# TIMER TEST ---------------------------------------------
+
+timer_tests: timer_tests.cpp $(OBJ_DIR)/Timer.o $(BIN_DIR)
+	g++ -o $(BIN_DIR)/timer_tests timer_tests.cpp $(OBJ_DIR)/Timer.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+
+$(OBJ_DIR)/Timer.o: $(SRC_DIR)/Timer.cpp $(INC_DIR)/Timer.h $(OBJ_DIR)
+	g++ -o $(OBJ_DIR)/Timer.o -c $(SRC_DIR)/Timer.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 # PARSING FLIGHT FILES TEST ---------------------------------------------
 
