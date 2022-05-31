@@ -227,8 +227,6 @@ void MissionStateMachine::cycle(void)
 			this->flags.state_entry = false;
 		}
 
-		// SUB-SM
-
 		// STATE TRANSFER CONDITIONS 
 		// once takeoff is finished, we can run the mission
 		if (event == Event::REACHED_HOME_COORDS) {
