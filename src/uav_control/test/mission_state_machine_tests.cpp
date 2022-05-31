@@ -263,6 +263,41 @@ bool test_11(void) {
 	return assert_eq(state, MissionStateMachine::State::EXIT, "Checking that we have transitioned into the IN_OFFBOARD state");
 }
 
+
+// all of the events that should happen: enum class Event {CHECKS_PREARM_COMPLETE, AIRCRAFT_ARMED, TAKEOFF_COMPLETE, OFFBOARD_MISSION_COMPLETE, REACHED_HOME_COORDS, TOUCHED_DOWN, DISARMED, NO_EVENT};
+bool test_12(void) {
+    cout << "Test 12: cycle throught the whole state machine with capped, pseudo-random numbers of cycles between events happening" << endl;
+
+	// instantiate the state machine without pre-setting state
+	MissionStateMachine state_machine = MissionStateMachine();
+	// we'll start in init
+	cycleStateMachineSeveralTimes(state_machine);
+	state_machine.registerEvent(MissionStateMachine::Event::CHECKS_PREARM_COMPLETE);
+	// now should be in arming
+	cycleStateMachineSeveralTimes(state_machine);
+	state_machine.registerEvent(MissionStateMachine::Event::AIRCRAFT_ARMED);
+	// now should be in taking off
+	cycleStateMachineSeveralTimes(state_machine);
+	state_machine.registerEvent(MissionStateMachine::Event::TAKEOFF_COMPLETE);
+	// now we're in offboard, flyin our mission
+	cycleStateMachineSeveralTimes(state_machine);
+	state_machine.registerEvent(MissionStateMachine::Event::OFFBOARD_MISSION_COMPLETE);
+	// we've completed the mission, so now we're returning home
+	cycleStateMachineSeveralTimes(state_machine);
+	state_machine.registerEvent(MissionStateMachine::Event::REACHED_HOME_COORDS);
+	// we're hovering above the home point now -- time to land
+	cycleStateMachineSeveralTimes(state_machine);
+	state_machine.registerEvent(MissionStateMachine::Event::TOUCHED_DOWN);
+	// we've landed, so let's disarm
+	cycleStateMachineSeveralTimes(state_machine);
+	state_machine.registerEvent(MissionStateMachine::Event::DISARMED);
+	// we're now disarmed, so we're done.
+	cycleStateMachineSeveralTimes(state_machine);
+	// check to make sure that we've transitioned into EXIT 
+	MissionStateMachine::State state = state_machine.getCurrentState();
+	return assert_eq(state, MissionStateMachine::State::EXIT, "Checking that we have transitioned into the IN_OFFBOARD state");
+}
+
 } // namespace mission_state_machine_tests END
 
 using namespace mission_state_machine_tests;
@@ -371,6 +406,16 @@ int main(void)
         std::cout << "Test succeeded." << std::endl;
     }
 	std::cout << std::endl;
+
+    std::cout << "Test 12:" << std::endl;
+    result = test_12();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
+
 
 }
 
