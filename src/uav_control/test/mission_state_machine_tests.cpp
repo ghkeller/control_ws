@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstddef>
+#include <time.h>
 
 #include "MissionStateMachine.h"
 
@@ -43,6 +44,17 @@ bool assert_eq(auto a, auto b, string test_desc = "")
 		return false;
 	}
 
+}
+
+void cycleStateMachineSeveralTimes(MissionStateMachine& state_machine)
+{
+	// cycle the state machine several times
+	// Use current time as seed for random generator
+	srand(time(0));
+
+	int cycleAmt = rand() % 20;
+	for(int i = 0; i<cycleAmt; i++)
+		state_machine.cycle();
 }
 
 namespace mission_state_machine_tests
@@ -295,7 +307,7 @@ bool test_12(void) {
 	cycleStateMachineSeveralTimes(state_machine);
 	// check to make sure that we've transitioned into EXIT 
 	MissionStateMachine::State state = state_machine.getCurrentState();
-	return assert_eq(state, MissionStateMachine::State::EXIT, "Checking that we have transitioned into the IN_OFFBOARD state");
+	return assert_eq(state, MissionStateMachine::State::EXIT, "Checking that we have transitioned through the whole state machine.");
 }
 
 } // namespace mission_state_machine_tests END
