@@ -4,6 +4,7 @@
 #include <geometry_msgs/PoseStamped.h>
 
 #include "MissionStateMachine.h"
+#include "Timer.h"
 
 #define DEBUG
 
@@ -321,229 +322,160 @@ void MissionStateMachine::cycle(void)
 
 
 
-/*
-InOffboardSubSM::InOffboardSubSM()
+InOffboardStateMachine::InOffboardStateMachine()
 {
 	// initialize the necessary components for our state machine
-	this->current_state = INIT;
+	this->current_state = State::INIT;
 	this->flags.state_entry = true;
+	this->flags.state_exit = false;
+
+	// state name string access
+	this->state_map[State::INIT] = "INIT";
+	this->state_map[State::SETTING_TARGET] = "SETTING_TARGET";
+	this->state_map[State::CYCLING] = "CYCLING";
+	this->state_map[State::STALLING_POST_WP_HIT] = "STALLING_POST_WP_HIT";
 }
+
+InOffboardStateMachine::State InOffboardStateMachine::getCurrentState(void)
+{
+	return this->current_state;
+}
+
+
+void InOffboardStateMachine::setCurrentState(InOffboardStateMachine::State state)
+{
+	this->current_state = state;
+}
+
+
+InOffboardStateMachine::Event InOffboardStateMachine::checkEvents()
+{
+	// get event from the front of the FIFO buffer (replace with priority buffer in future?)
+	Event event;
+
+	// if no events, return NO_EVENT
+	if (this->event_queue.empty()) {
+		return Event::NO_EVENT;
+	} 
+
+	// pop and return the event
+	event = this->event_queue.front();
+	this->event_queue.pop();
+	return event;
+}
+
+void InOffboardStateMachine::registerEvent(InOffboardStateMachine::Event event)
+{
+	// add the event to the queue
+	this->event_queue.push(event);
+}
+
+
+	//for reference:
+	//enum class State {INIT, SETTING_TARGET, CYCLING, STALLING_POST_WP_HIT}; 
+	//enum class Event {WAYPOINT_HIT, POST_WP_HIT_TIMER_STARTED, POST_WP_HIT_TIMER_FINISHED};
 
 // main body of the state machine
-void InOffboardSubSM::cycle() {
-	this::current_state
+void InOffboardStateMachine::cycle()
+{
+
+	// unless a new state is to be traversed to, keep the same state
+	State next_state = this->current_state;
+
+	// check for events
+	Event event = this->checkEvents();
 
 	//sub state machine for offboard mode
-	switch (current_avoid_substate) {
-		case INIT:
+	switch (this->current_state) {
 
-		if (avoid_substate_entry == true) {
+		case State::INIT:
+
+		if (this->flags.state_entry == true) {
 			// state entry execution
-			ROS_INFO("In state 'SUB_INIT'...");
-
-			avoid_substate_entry = false;
+			debugOut("	In state 'INIT'...", BLUE);
+			this->flags.state_entry = false;
 		}
-
 
 		// STATE TRANSFER CONDITIONS 
 		// only cycle through the init state once
+
 		if (true) {
-			ROS_INFO("Going to state 'SETTING_TARGET'...");
-			next_avoid_substate = SETTING_TARGET;
-			avoid_substate_entry = true;
+			debugOut("	Next state will be 'SETTING_TARGET'...", CYAN);
+			next_state = State::SETTING_TARGET;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'INIT'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
 		}
 
 		break;
 
-		case SETTING_TARGET:
+		case State::SETTING_TARGET:
 
-		if (avoid_substate_entry == true) {
+		if (this->flags.state_entry == true) {
 			// state entry execution
-			ROS_INFO("In state 'SETTING_TARGET'...");
+			debugOut("	In state 'SETTING_TARGET'...", BLUE);
+			this->flags.state_entry = false;
 
-			if (vec_iterator < pt_vec.size()) {
-				// get next waypoint to traverse to
-				ROS_INFO("	Getting vector %d", vec_iterator);
-				desired_target = pt_vec.at(vec_iterator);
+			//set the target here -- we'll otherwise be idle in this state
 
-			    ROS_INFO("  position.x: %f", desired_target.pose.position.x);
-			    ROS_INFO("  position.y: %f", desired_target.pose.position.y);
-			    ROS_INFO("  position.z: %f", desired_target.pose.position.z);
-
-			    ROS_INFO("...redirecting to mavros...");
-
-				vec_iterator++; 
-			}
-            //start timer
-            last_request = ros::Time::now();
-
-			avoid_substate_entry = false;
 		}
 
-        target_pos_pub.publish(desired_target);
-        ros::spinOnce();
+		// we only needed to set the target, so now we can go into cycling
+		if (true) {
+			debugOut("	Next state will be 'CYCLING'...", CYAN);
+			next_state = State::CYCLING;
+			this->flags.state_exit = true;
+		}
 
-
-		// STATE TRANSFER CONDITIONS 
-		 //we only want to send the target value once to the handling thread
-		 if (true) {
-		 	ROS_INFO("Going to state 'CYCLING'...");
-		 	next_avoid_substate = CYCLING;
-		 	avoid_substate_entry = true;
-		 }
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'SETTING_TARGET'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
 
 		break;
 
 		case CYCLING:
 
-		if (avoid_substate_entry == true) {
+		if (this->flags.state_entry == true) {
 			// state entry execution
-			ROS_INFO("In state 'CYCLING'...");
-            //start timer
-            last_request = ros::Time::now();
-
-			avoid_substate_entry = false;
+			debugOut("	In state 'CYCLING'...", BLUE);
+			this->flags.state_entry = false;
 		}
 
-		pt_reached_flag = pt_reached();
+		// we're cycling the setpoint value currently, so now we need to wait unti we
+		// hit the waypoint.
 
-		// STATE TRANSFER CONDITIONS
-		// when we've reached the waypoint, we should transfer to setting or leaving
-		if (pt_reached_flag == true && vec_iterator > 3) {
-			ROS_INFO("Finished traversing alternate waypoints");
-			pt_reached_flag = false;
-			return true; // indicating that we are finished traversing
-		} else if (pt_reached_flag == true && vec_iterator <= 3) {
-			ROS_INFO("Going to state 'SETTING_TARGET'...");
-			pt_reached_flag = false;
-			next_avoid_substate = SETTING_TARGET;
-			avoid_substate_entry = true;
+		if (event == Event::WAYPOINT_HIT) {
+			debugOut("	Next state will be 'STALLING_POST_WP_HIT'...", CYAN);
+			next_state = State::STALLING_POST_WP_HIT;
+			this->flags.state_exit = true;
 		}
 
-		//if it is taking unreasonably long to get to the next waypoint, assume we are close but toilet bowling
-		if (ros::Time::now() - last_request > ros::Duration(wp_visit_timeout)) {
-			ROS_INFO("Going to state 'SETTING_TARGET'...");
-			next_avoid_substate = SETTING_TARGET;
-			avoid_substate_entry = true;
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'CYCLING'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
 		}
 
 		break;
 
+		//add: stalling post wp hit state here
+
 		default:
+
+		debugOut("ERROR: dropped into default state -- state machine has lost state!", RED);
+		cout << endl;
 
 		break;
 	}
 
-	current_avoid_substate = next_avoid_substate;
-	return false; // indicating that we are not finished with our alternate waypoints
+	this->current_state = next_state;
 }
-
-
-
-
-mavros_msgs::PositionTarget desired_target;
-
-//two vectors which store the position targets and their respective times
-std::vector<mavros_msgs::PositionTarget> pt_vec;
-std::vector<float> vec_time;
-
-void offboard_sub_sm(void) {
-	//sub state machine for offboard mode
-	switch (current_offboard_substate) {
-		case SUB_INIT:
-
-		if (offboard_substate_entry == true) {
-			// state entry execution
-			ROS_INFO("In state 'SUB_INIT'...");
-
-			offboard_substate_entry = false;
-		}
-
-
-		// STATE TRANSFER CONDITIONS
-		// only cycle through the init state once
-		if (true) {
-			ROS_INFO("Going to state 'SETTING_TARGET'...");
-			next_offboard_substate = SETTING_TARGET;
-			offboard_substate_entry = true;
-		}
-
-		break;
-
-		case SETTING_TARGET:
-
-		if (offboard_substate_entry == true) {
-			// state entry execution
-			ROS_INFO("In state 'SETTING_TARGET'...");
-
-			if (vec_iterator < pt_vec.size()) {
-				// get next waypoint to traverse to
-				ROS_INFO("	Getting vector %d", vec_iterator);
-				desired_target = pt_vec.at(vec_iterator);
-
-				ROS_INFO("Current target from PT vector: ");
-				ROS_INFO("  coordinate frame: %d", desired_target.coordinate_frame);
-				ROS_INFO("  type mask: %d", desired_target.type_mask);
-				ROS_INFO("  position.x: %f", desired_target.position.x);
-				ROS_INFO("  position.y: %f", desired_target.position.y);
-				ROS_INFO("  position.z: %f", desired_target.position.z);
-				ROS_INFO("  acceleration_or_force.x: %f", desired_target.acceleration_or_force.x);
-				ROS_INFO("  acceleration_or_force.y: %f", desired_target.acceleration_or_force.y);
-				ROS_INFO("  acceleration_or_force.z: %f", desired_target.acceleration_or_force.z);
-				ROS_INFO("  velocity.x: %f", desired_target.velocity.x);
-				ROS_INFO("  velocity.y: %f", desired_target.velocity.y);
-				ROS_INFO("  velocity.z: %f", desired_target.velocity.z);
-				ROS_INFO("  yaw: %f", desired_target.yaw);
-				ROS_INFO("  yaw_rate: %f", desired_target.yaw_rate);
-
-				vec_iterator++; 
-			}
-            //start timer
-            last_request = ros::Time::now();
-
-			offboard_substate_entry = false;
-		}
-
-        target_pos_pub.publish(desired_target);
-        ros::spinOnce();
-
-
-		// STATE TRANSFER CONDITIONS 
-		 //we only want to send the target value once to the handling thread
-		 if (true) {
-		 	ROS_INFO("Going to state 'CYCLING'...");
-		 	next_offboard_substate = CYCLING;
-		 	offboard_substate_entry = true;
-		 }
-
-		break;
-
-		case CYCLING:
-
-		if (offboard_substate_entry == true) {
-			// state entry execution
-			ROS_INFO("In state 'CYCLING'...");
-            //start timer
-            last_request = ros::Time::now();
-
-			offboard_substate_entry = false;
-		}
-
-		// STATE TRANSFER CONDITIONS
-		// when we've reached the waypoint, we should transfer to waiting
-		if (ros::Time::now() - last_request > ros::Duration(vec_time.at(vec_iterator - 1))) {
-			ROS_INFO("Going to state 'SETTING_TARGET'...");
-			next_offboard_substate = SETTING_TARGET;
-			offboard_substate_entry = true;
-		}
-
-		break;
-
-		default:
-
-		break;
-	}
-
-	current_offboard_substate = next_offboard_substate;
-}
-*/

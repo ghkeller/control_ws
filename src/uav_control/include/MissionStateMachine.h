@@ -8,14 +8,10 @@
 #include <map>
 
 /* local includes */
+#include "Timer.h"
 
 using namespace std;
 
-//helper class: Timer
-class Timer
-{
-
-}
 
 class MissionStateMachine
 {
@@ -58,8 +54,8 @@ class InOffboardStateMachine
 	InOffboardStateMachine();
 
 	// defining states
-	enum class state {INIT, SETTING_TARGET, CYCLING, STALLING_POST_WP_HIT}; 
-	enum class Event {WAYPOINT_HIT, POST_WP_HIT_TIMER_STARTED, POST_WP_HIT_TIMER_FINISHED};
+	enum class State {INIT, SETTING_TARGET, CYCLING, STALLING_POST_WP_HIT}; 
+	enum class Event {WAYPOINT_HIT, POST_WP_HIT_TIMER_STARTED, POST_WP_HIT_TIMER_FINISHED, NO_EVENT};
 
 	// mappings for names
 	map<State, string> state_map;
@@ -83,4 +79,4 @@ class InOffboardStateMachine
 		bool state_entry;
 		bool state_exit;
 	} flags;
-}
+};

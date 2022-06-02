@@ -34,11 +34,11 @@ $(OBJ_DIR)/Parsing.o: $(SRC_DIR)/Parsing.cpp $(INC_DIR)/Parsing.h $(OBJ_DIR)
 
 # MISSION STATE MACHINE TEST ---------------------------------------------
 
-mission_state_machine_tests: mission_state_machine_tests.cpp $(OBJ_DIR)/MissionStateMachine.o $(BIN_DIR)
-	g++ -o $(BIN_DIR)/mission_state_machine_tests mission_state_machine_tests.cpp $(OBJ_DIR)/MissionStateMachine.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+mission_state_machine_tests: mission_state_machine_tests.cpp $(OBJ_DIR)/MissionStateMachine.o $(OBJ_DIR)/Timer.o $(BIN_DIR)
+	g++ -o $(BIN_DIR)/mission_state_machine_tests mission_state_machine_tests.cpp $(OBJ_DIR)/MissionStateMachine.o $(OBJ_DIR)/Timer.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
-$(OBJ_DIR)/MissionStateMachine.o: $(SRC_DIR)/MissionStateMachine.cpp $(INC_DIR)/MissionStateMachine.h $(OBJ_DIR)
-	g++ -o $(OBJ_DIR)/MissionStateMachine.o -c $(SRC_DIR)/MissionStateMachine.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+$(OBJ_DIR)/MissionStateMachine.o: $(SRC_DIR)/MissionStateMachine.cpp $(INC_DIR)/MissionStateMachine.h $(OBJ_DIR)/Timer.o $(OBJ_DIR)
+	g++ -o $(OBJ_DIR)/MissionStateMachine.o -c $(SRC_DIR)/MissionStateMachine.cpp $(OBJ_DIR)/Timer.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 # POSITION TARGET SCHEME ---------------------------------------------
 

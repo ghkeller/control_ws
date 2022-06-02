@@ -57,6 +57,17 @@ void cycleStateMachineSeveralTimes(MissionStateMachine& state_machine)
 		state_machine.cycle();
 }
 
+void cycleStateMachineSeveralTimes(InOffboardStateMachine& state_machine)
+{
+	// cycle the state machine several times
+	// Use current time as seed for random generator
+	srand(time(0));
+
+	int cycleAmt = rand() % 20;
+	for(int i = 0; i<cycleAmt; i++)
+		state_machine.cycle();
+}
+
 namespace mission_state_machine_tests
 {
 
@@ -310,7 +321,6 @@ bool test_12(void) {
 	return assert_eq(state, MissionStateMachine::State::EXIT, "Checking that we have transitioned through the whole state machine.");
 }
 
-
 bool test_13(void) {
     cout << "Test 13: initialize the sub-state machine for the offboard state" << endl;
 
@@ -321,6 +331,58 @@ bool test_13(void) {
 	InOffboardStateMachine::State state = offboard_state_machine.getCurrentState();
 	return assert_eq(state, InOffboardStateMachine::State::INIT, "Check to make sure we start in the init state");
 }
+
+
+bool test_14(void) {
+    cout << "Test 14: transitioning out of the INIT state and into the SETTING_TARGET state of the sub sm" << endl;
+
+	// instantiate the state machine without pre-setting state
+	InOffboardStateMachine offboard_state_machine = InOffboardStateMachine();
+
+	// cycle once to get out of the init state
+	offboard_state_machine.cycle();
+
+	// check to make sure that we start in init
+	InOffboardStateMachine::State state = offboard_state_machine.getCurrentState();
+	return assert_eq(state, InOffboardStateMachine::State::SETTING_TARGET, "Checking that we have transitioned into the SETTING_TARGET state");
+}
+
+bool test_15(void) {
+    cout << "Test 15: transitioning out of the SETTING_TARGET state and into the CYCLING state of the sub sm" << endl;
+
+	// instantiate the state machine without pre-setting state
+	InOffboardStateMachine offboard_state_machine = InOffboardStateMachine();
+	offboard_state_machine.setCurrentState(InOffboardStateMachine::State::SETTING_TARGET);
+
+	// cycle once to get out of the init state
+	offboard_state_machine.cycle();
+
+	// check to make sure that we start in init
+	InOffboardStateMachine::State state = offboard_state_machine.getCurrentState();
+	return assert_eq(state, InOffboardStateMachine::State::CYCLING, "Checking that we have transitioned into the CYCLING state");
+}
+
+bool test_16(void) {
+    cout << "Test 16: transitioning out of the CYCLING state and into the STALLING_POST_WP_HIT state of the sub sm" << endl;
+
+	// instantiate the state machine without pre-setting state
+	InOffboardStateMachine offboard_state_machine = InOffboardStateMachine();
+	offboard_state_machine.setCurrentState(InOffboardStateMachine::State::CYCLING);
+
+	// cycle once to get out of the init state
+	offboard_state_machine.cycle();
+
+	// let the sm know that we've hit the waypoint
+	offboard_state_machine.registerEvent(InOffboardStateMachine::Event::WAYPOINT_HIT);
+
+	// cycle once to process the event registered
+	offboard_state_machine.cycle();
+
+	// check to make sure that we start in init
+	InOffboardStateMachine::State state = offboard_state_machine.getCurrentState();
+	return assert_eq(state, InOffboardStateMachine::State::STALLING_POST_WP_HIT , "Checking that we have transitioned into the STALLING_POST_WP_HIT state");
+}
+
 } // namespace mission_state_machine_tests END
 
 using namespace mission_state_machine_tests;
@@ -448,6 +510,23 @@ int main(void)
     }
 	std::cout << std::endl;
 
+    std::cout << "Test 14:" << std::endl;
+    result = test_14();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
+
+    std::cout << "Test 15:" << std::endl;
+    result = test_15();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
 
 }
 
