@@ -383,6 +383,28 @@ bool test_16(void) {
 	return assert_eq(state, InOffboardStateMachine::State::STALLING_POST_WP_HIT , "Checking that we have transitioned into the STALLING_POST_WP_HIT state");
 }
 
+
+bool test_17(void) {
+    cout << "Test 17: transitioning out of the STALLING_POST_WP_HIT state and back into the state of SETTING_TARGET (i.e., there are more waypoints) in the sub sm" << endl;
+
+	// instantiate the state machine without pre-setting state
+	InOffboardStateMachine offboard_state_machine = InOffboardStateMachine();
+	offboard_state_machine.setCurrentState(InOffboardStateMachine::State::STALLING_POST_WP_HIT);
+
+	// cycle once to get out of the init state
+	offboard_state_machine.cycle();
+
+	// let the sm know that the timer has elapsed -- this is fudged, because in this case, it has not actually elapsed, but we want to test the transition
+	offboard_state_machine.registerEvent(InOffboardStateMachine::Event::WAYPOINT_STALL_TIMER_ELAPSED);
+
+	// cycle once to process the event registered
+	offboard_state_machine.cycle();
+
+	// check to make sure that we start in init
+	InOffboardStateMachine::State state = offboard_state_machine.getCurrentState();
+	return assert_eq(state, InOffboardStateMachine::State::STALLING_POST_WP_HIT , "Checking that we have transitioned into the STALLING_POST_WP_HIT state");
+}
+
 } // namespace mission_state_machine_tests END
 
 using namespace mission_state_machine_tests;
@@ -528,5 +550,22 @@ int main(void)
     }
 	std::cout << std::endl;
 
+    std::cout << "Test 16:" << std::endl;
+    result = test_16();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
+
+    std::cout << "Test 17:" << std::endl;
+    result = test_17();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
 }
 

@@ -441,7 +441,7 @@ void InOffboardStateMachine::cycle()
 
 		break;
 
-		case CYCLING:
+		case State::CYCLING:
 
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -453,6 +453,7 @@ void InOffboardStateMachine::cycle()
 		// hit the waypoint.
 
 		if (event == Event::WAYPOINT_HIT) {
+			debugOut("	The waypoint has been hit.", YELLOW);
 			debugOut("	Next state will be 'STALLING_POST_WP_HIT'...", CYAN);
 			next_state = State::STALLING_POST_WP_HIT;
 			this->flags.state_exit = true;
@@ -467,7 +468,35 @@ void InOffboardStateMachine::cycle()
 
 		break;
 
-		//add: stalling post wp hit state here
+		case State::STALLING_POST_WP_HIT:
+
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'STALLING_POST_WP_HIT'...", BLUE);
+			this->flags.state_entry = false;
+
+			// this is where to start the stall timer
+		}
+
+		// we're cycling the setpoint value currently, so now we need to wait unti we
+		// hit the waypoint.
+
+		if (false) {
+			debugOut("	The waypoint stall timer has now run out.", YELLOW);
+			debugOut("	Next state will be 'SETTING_TARGET'...", CYAN);
+			next_state = State::STALLING_POST_WP_HIT;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'STALLING_POST_WP_HIT'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+
+		break;
+
 
 		default:
 
