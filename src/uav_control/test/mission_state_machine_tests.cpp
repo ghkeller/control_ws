@@ -402,7 +402,7 @@ bool test_17(void) {
 
 	// check to make sure that we start in init
 	InOffboardStateMachine::State state = offboard_state_machine.getCurrentState();
-	return assert_eq(state, InOffboardStateMachine::State::STALLING_POST_WP_HIT , "Checking that we have transitioned into the STALLING_POST_WP_HIT state");
+	return assert_eq(state, InOffboardStateMachine::State::SETTING_TARGET, "Checking that we have transitioned into the STALLING_POST_WP_HIT state");
 }
 
 } // namespace mission_state_machine_tests END

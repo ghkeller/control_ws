@@ -23,12 +23,8 @@
 #include <iostream>
 
 //* local includes *//
-#include "PositionTargetScheme.h"
 #include "ROSMissionComponents.h"
-#include "FlyMissionSM.h"
-#include "AgentSM.h"
 #include "Flight.h"
-
 
 using namespace fly_mission;
 
@@ -39,8 +35,12 @@ int main(int argc, char **argv)
 
     ROS_INFO("Starting the 'fly_mission' control node.");
 
-	// read in 
-	ROSMissionComponents rmc(nh);
+	// initialize ros-related parts of this operation
+	ROSMissionComponents rmc = ROSMissionComponents(nh);
+
+	// create an instance of a flight and load the contents of the flight file  
+	Flight flight = Flight(rmc.getFlightFilename());
+
 
 	// load the flight
     ROS_INFO("flight filename: %s", flight_fname.c_str());

@@ -37,6 +37,9 @@ MissionStateMachine::MissionStateMachine() {
 	this->state_map[State::INIT] = "INIT";
 	this->state_map[State::CHECKING_PREARM] = "CHECKING_PREARM";
 	this->state_map[State::ARMING] = "ARMING";
+
+	// instantiate the sub-sm objects
+	this->in_offboard_sm = InOffboardStateMachine();
 }
 
 

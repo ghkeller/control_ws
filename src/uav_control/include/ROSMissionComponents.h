@@ -59,6 +59,8 @@ class ROSMissionComponents
 	bool setCollisionAvoidanceFlag()
 		{ return this->coll_av_flag };
 
+	string getFlightFilename()
+		{ return this->flight_fname };
 
 	//pseudo-getters
 	void fetchParams();
