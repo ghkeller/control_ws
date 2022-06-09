@@ -1,63 +1,38 @@
 #pragma once
 
 #include <iostream>
+#include <string>
 #include <queue>
 #include <vector>
-#include <typeinfo>
 
 using namespace std;
 
-enum class Events { NO_EVENT };
-
-class Event
-{
-	public:
-	Event() {};
-	Event( Events val ) { this->val = val; };
-	virtual ~Event() {};
-
-	// value getter
-	Events getValue() { return this->val; };
-
-	// value setter
-	virtual void setValue(Events val) { this->val = val; };
-
-	private:
-	Events val;
-};
-
-enum class States { INIT };
-
-class State
-{
-	public:
-	State() {};
-	State( States val ) { this->val = val; };
-	virtual ~State() {};
-
-	// value getter
-	States getValue() { cout << "why?" << endl; return this->val; }; 
-
-/*
-
-	// value setter
-	virtual void setValue(States val) { this->val = val; };
-*/
-
-	private:
-	States val;
-};
+/* BASE */
 
 class StateMachine
 {
 	public:
-	StateMachine();
+	StateMachine() {};
+	virtual ~StateMachine() {};
 
-	// primary method : requires implementation in derived classes
+	class State {
+		int value_;
+		public:
+		virtual ~State () {};
+		int & value()				{ return value_; }
+		const int & value() const 	{ return value_; }
+	};
+
+	class Event {
+		int value_;
+		public:
+		virtual ~Event () {};
+		int & value()				{ return value_; }
+		const int & value() const 	{ return value_; }
+	};
+
+	// primary execution
 	virtual void cycle() = 0;
-	
-	// method for ingesting the events we need to process
-	void registerEvents( queue<Event*>& events_to_register_q );
 
 	// methods for assessing the event type (abstracted through the following method for 
 	// ease of overriding
@@ -70,33 +45,58 @@ class StateMachine
 			return false;
 	}
 
-	// override this method in each derived state Machine, replacing the template param
-	virtual bool isAValidEvent( Event* event ) { return checkValidEvent<Event *>( event ); }
+	// override this method in each derived state machine, replacing the template param
+	virtual bool isAValidEvent( Event* event ) = 0;
 
-/*
-	// adds a pointer to a sub state machine for the event processing chain
-	void addSubStateMachine( StateMachine* sub_state_machine ) { this->sub_state_machines.push_back( sub_state_machine ); }
+	// method for ingesting the events we need to process
+	void registerEvents( queue<Event*>& events_to_register_q )
+	{
+		// add events to this state machine to be processed
+		queue<Event*> unprocessed_events;
+		while ( !events_to_register_q.empty() )
+		{
+			cout << "processing an event..." << endl;
+			Event* event_ptr = events_to_register_q.front();
+			if ( this->isAValidEvent( event_ptr ) ) {
+				cout << "	... adding this event to the locally maintained queue." << endl;
+				this->event_queue.push( event_ptr );
+			} else {
+				cout << "	...event is not valid for this sm. passing to substates..." << endl;
+				unprocessed_events.push( event_ptr );
+			}
+			events_to_register_q.pop();
+		}
 
-	*/
-	// get the event at the front of our queue
-	Event* checkEvents();
 
-	//getters
-	State* getCurrentState(void);
+		// pass unprocessed events to the substate machines
+		for ( StateMachine * sub_state_machine : this->sub_SMs )
+		{ 
+			sub_state_machine->registerEvents( unprocessed_events );
+		}
+	}
+
+	// event checker which returns the next event in the FIFO
+	Event *checkEvents()
+	{ 
+		if ( !event_queue.empty() ) {
+			Event *next_event = event_queue.front();
+			event_queue.pop();
+			return next_event;
+		} else {
+			return nullptr;
+		}
+	};
 
 
-	//setters
-	void setCurrentState( State * );
-
-	private:
-	vector<StateMachine *> sub_state_machines;
+	// getters
+	State* getCurrentState() { return this->current_state_ptr; };
+	
+	// setters
+	void setCurrentState( State *state ) { this->current_state_ptr = state; };
 
 	protected:
-	queue<Event*> event_ptr_queue;
-	State* current_state_ptr;
-	struct transition_flags {
-		bool state_entry;
-		bool state_exit;
-	} flags;
-
+	State *current_state_ptr;
+	queue<Event *> event_queue;
+	vector<StateMachine *> sub_SMs;
 };
+
