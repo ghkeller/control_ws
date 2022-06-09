@@ -38,9 +38,6 @@ class MyStateMachine : public StateMachine
 	bool isAValidEvent( StateMachine::Event* event_ptr ) { return checkValidEvent<MyStateMachine::Event *>( event_ptr ); };
 	void cycle();
 
-	private:
-	State current_state = State( State::INIT );
-
 };
 
 class TheirStateMachine : public StateMachine
@@ -50,8 +47,8 @@ class TheirStateMachine : public StateMachine
 	class State : public StateMachine::State {
 		public:
 		// pseudo-enum declaration
-		static const int INIT = 0;
-		static const int DOODLING = 1;
+		static const int STATE_1 = 0;
+		static const int STATE_2 = 1;
 
 		State ();
 		State ( int starting_state ) { this->value() = starting_state; };
@@ -69,16 +66,13 @@ class TheirStateMachine : public StateMachine
 	};
 
 	TheirStateMachine () : StateMachine {} {
-		this->current_state_ptr = new State( State::INIT );
+		this->current_state_ptr = new State( State::STATE_1 );
 		this->sub_SMs.push_back( new MyStateMachine );
 	}
 	virtual ~TheirStateMachine() {};
 	void cycle();
 
 	bool isAValidEvent( StateMachine::Event* event_ptr ) { return checkValidEvent<TheirStateMachine::Event *>( event_ptr ); };
-
-	private:
-	State current_state = State( State::INIT );
 
 };
 

@@ -9,14 +9,14 @@
 void MyStateMachine::cycle()
 {
 	// set up next state as current in case nothing changes
-	State* current_state = (State*) this->getCurrentState();
-	State* next_state = current_state;
+	int current_state = this->getCurrentState();
+	int next_state = current_state;
 
 
 	// check for events to ingest
 	Event* event = (Event*) this->checkEvents();
 
-	switch (current_state->value())
+	switch (current_state)
 	{
 	default:
 
@@ -31,14 +31,14 @@ void MyStateMachine::cycle()
 void TheirStateMachine::cycle()
 {
 	// set up next state as current in case nothing changes
-	State* current_state = (State*) this->getCurrentState();
-	State* next_state = current_state;
+	int current_state = this->getCurrentState();
+	int next_state = current_state;
 
 
 	// check for events to ingest
 	Event* event = (Event*) this->checkEvents();
 
-	switch (current_state->value())
+	switch (current_state)
 	{
 	default:
 

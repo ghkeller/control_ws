@@ -89,10 +89,10 @@ class StateMachine
 
 
 	// getters
-	State* getCurrentState() { return this->current_state_ptr; };
+	int getCurrentState() { return this->current_state_ptr->value(); };
 	
 	// setters
-	void setCurrentState( State *state ) { this->current_state_ptr = state; };
+	void setCurrentState( int state ) { this->current_state_ptr->value() = state; };
 
 	protected:
 	State *current_state_ptr;
