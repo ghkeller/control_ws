@@ -14,7 +14,7 @@ LDLIBS   := -lm
 
 .PHONY: all clean
 
-all: timer_tests parsing_tests position_target_scheme_tests flight_class_tests
+all: timer_tests parsing_tests position_target_scheme_tests flight_class_tests mission_state_machine_tests
 
 # TIMER TEST ---------------------------------------------
 
@@ -34,11 +34,14 @@ $(OBJ_DIR)/Parsing.o: $(SRC_DIR)/Parsing.cpp $(INC_DIR)/Parsing.h $(OBJ_DIR)
 
 # MISSION STATE MACHINE TEST ---------------------------------------------
 
-mission_state_machine_tests: mission_state_machine_tests.cpp $(OBJ_DIR)/MissionStateMachine.o $(OBJ_DIR)/Timer.o $(BIN_DIR)
-	g++ -o $(BIN_DIR)/mission_state_machine_tests mission_state_machine_tests.cpp $(OBJ_DIR)/MissionStateMachine.o $(OBJ_DIR)/Timer.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+mission_state_machine_tests: mission_state_machine_tests.cpp $(OBJ_DIR)/StateMachine.o $(OBJ_DIR)/MissionStateMachine.o $(BIN_DIR)
+	g++ -o $(BIN_DIR)/mission_state_machine_tests mission_state_machine_tests.cpp $(OBJ_DIR)/StateMachine.o $(OBJ_DIR)/MissionStateMachine.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
-$(OBJ_DIR)/MissionStateMachine.o: $(SRC_DIR)/MissionStateMachine.cpp $(INC_DIR)/MissionStateMachine.h $(OBJ_DIR)/Timer.o $(OBJ_DIR)
-	g++ -o $(OBJ_DIR)/MissionStateMachine.o -c $(SRC_DIR)/MissionStateMachine.cpp $(OBJ_DIR)/Timer.o $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+$(OBJ_DIR)/MissionStateMachine.o: $(SRC_DIR)/MissionStateMachine.cpp $(INC_DIR)/MissionStateMachine.h $(INC_DIR)/StateMachine.h $(OBJ_DIR)
+	g++ -o $(OBJ_DIR)/MissionStateMachine.o -c $(SRC_DIR)/MissionStateMachine.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
+
+$(OBJ_DIR)/StateMachine.o: $(SRC_DIR)/StateMachine.cpp $(INC_DIR)/StateMachine.h $(OBJ_DIR)
+	g++ -o $(OBJ_DIR)/StateMachine.o -c $(SRC_DIR)/StateMachine.cpp $(LDFLAGS) $(LDLIBS) $(CXXFLAGS) $(CFLAGS)
 
 # POSITION TARGET SCHEME ---------------------------------------------
 

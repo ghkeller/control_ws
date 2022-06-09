@@ -5,8 +5,11 @@
 #include <string>
 #include <cstddef>
 #include <time.h>
+#include <queue>
 
+#include "StateMachine.h"
 #include "MissionStateMachine.h"
+//#include "InOffboardStateMachine.h"
 
 using namespace std;
 
@@ -19,7 +22,6 @@ bool assert_true(bool statement, string test_desc = "")
 		cout << "Assert true: failed >> " << test_desc << endl;
 		return true;
 	}
-
 }
 
 bool assert_false(bool statement, string test_desc = "")
@@ -46,7 +48,8 @@ bool assert_eq(auto a, auto b, string test_desc = "")
 
 }
 
-void cycleStateMachineSeveralTimes(MissionStateMachine& state_machine)
+/*
+void cycleStateMachineSeveralTimes(StateMachine* state_machine)
 {
 	// cycle the state machine several times
 	// Use current time as seed for random generator
@@ -54,19 +57,9 @@ void cycleStateMachineSeveralTimes(MissionStateMachine& state_machine)
 
 	int cycleAmt = rand() % 20;
 	for(int i = 0; i<cycleAmt; i++)
-		state_machine.cycle();
+		state_machine->cycle();
 }
-
-void cycleStateMachineSeveralTimes(InOffboardStateMachine& state_machine)
-{
-	// cycle the state machine several times
-	// Use current time as seed for random generator
-	srand(time(0));
-
-	int cycleAmt = rand() % 20;
-	for(int i = 0; i<cycleAmt; i++)
-		state_machine.cycle();
-}
+*/
 
 namespace mission_state_machine_tests
 {
@@ -76,28 +69,29 @@ bool test_1(void) {
 
 	// instantiate the state machine
 	MissionStateMachine state_machine = MissionStateMachine();
+	MissionStates current_state = state_machine.getCurrentState();
 
-	MissionStateMachine::State state = state_machine.getCurrentState();
-	return assert_eq(state, MissionStateMachine::State::INIT, "Checking that we're in INIT on initialization.");
+	// check if we start in the INIT state
+	return assert_eq(current_state, MissionStates::INIT, "Checking that we're in INIT on initialization.");
 }
 
 
 bool test_2(void) {
-    cout << "Test 2: transitioning out of the INIT state and into the CHECKING state" << endl;
+    cout << "Test 2: transitioning out of the INIT state and into the CHECKING_PREARM state" << endl;
 
 	// instantiate the state machine
 	MissionStateMachine state_machine = MissionStateMachine();
 
 	// cycling the state machine once will take us out of init (i.e., nothing needs to happen externally)
 	state_machine.cycle();
-	MissionStateMachine::State state = state_machine.getCurrentState();
+	MissionStates current_state = state_machine.getCurrentState();
 
-	return assert_eq(state, MissionStateMachine::State::CHECKING_PREARM, "Checking that we have transitioned into the CHECKING_PREARM state");
+	return assert_eq(current_state, MissionStates::CHECKING_PREARM, "Checking that we have transitioned into the CHECKING_PREARM state");
 }
 
 
 bool test_3(void) {
-    cout << "Test 3: cycling, but staying in the CYCLING state" << endl;
+    cout << "Test 3: testing state after checks completed" << endl;
 
 	// instantiate the state machine
 	MissionStateMachine state_machine = MissionStateMachine();
@@ -108,28 +102,15 @@ bool test_3(void) {
 	// cycling the state machine again should still keep us in the PREARM_CHECKING state"
 	state_machine.cycle();
 
-	MissionStateMachine::State state = state_machine.getCurrentState();
-	return assert_eq(state, MissionStateMachine::State::CHECKING_PREARM, "Checking that we have not transitioned -- we have only cycled, but no event has been registered yet.");
-}
+	MissionEvent e( MissionEvents::CHECKS_PREARM_COMPLETE );
+	queue<Event *> q( { &e } );
 
-bool test_4(void) {
-    cout << "Test 4: transitioning out of the INIT state and into the CHECKING state" << endl;
-
-	// instantiate the state machine
-	MissionStateMachine state_machine = MissionStateMachine();
-
-	// cycling the state machine once will take us out of init (i.e., nothing needs to happen externally)
+	state_machine.registerEvents( q );
 	state_machine.cycle();
 
-	// let the state machine know that everything we need to do for checking has been completed
-	state_machine.registerEvent(MissionStateMachine::Event::CHECKS_PREARM_COMPLETE);
+	MissionStates current_state = state_machine.getCurrentState();
 
-	// cycling the state machine once will take us out of init (i.e., nothing needs to happen externally)
-	state_machine.cycle();
-
-	// check to make sure that we will now transition into ARMING
-	MissionStateMachine::State state = state_machine.getCurrentState();
-	return assert_eq(state, MissionStateMachine::State::ARMING, "Checking that we have transitioned into the ARMING state");
+	return assert_eq(current_state, MissionStates::ARMING, "Checking that we have not transitioned -- we have only cycled, but no event has been registered yet.");
 }
 
 bool test_5(void) {
@@ -137,7 +118,8 @@ bool test_5(void) {
 
 	// instantiate the state machine
 	MissionStateMachine state_machine = MissionStateMachine();
-	state_machine.setCurrentState(MissionStateMachine::State::ARMING);
+
+	state_machine.setCurrentState( MissionStates::ARMING );
 
 	// cycling the state machine once to make sure we've actually dropped into that state
 	// this should show debug output as evidence of this 
@@ -405,6 +387,7 @@ bool test_17(void) {
 	return assert_eq(state, InOffboardStateMachine::State::SETTING_TARGET, "Checking that we have transitioned into the STALLING_POST_WP_HIT state");
 }
 
+*/
 } // namespace mission_state_machine_tests END
 
 using namespace mission_state_machine_tests;
@@ -441,6 +424,8 @@ int main(void)
         std::cout << "Test succeeded." << std::endl;
     }
 	std::cout << std::endl;
+
+	/*
 
     std::cout << "Test 4:" << std::endl;
     result = test_4();
@@ -567,5 +552,6 @@ int main(void)
         std::cout << "Test succeeded." << std::endl;
     }
 	std::cout << std::endl;
+*/
 }
 

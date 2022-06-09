@@ -21,6 +21,8 @@ class ROSMissionComponents
 	void setCurrentPose( geometry_msgs::PoseStamped _current_pose)
 		{ this->current_pose = _current_pose };
 
+
+		// pseudo-enum declaration
 	void setCurrentTarget( mavros_msgs::PositionTarget _current_target)
 		{ this->current_target = _current_target };
 

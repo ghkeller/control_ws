@@ -3,6 +3,7 @@
 #include <std_msgs/String.h>
 #include <geometry_msgs/PoseStamped.h>
 
+#include "StateMachine.h"
 #include "MissionStateMachine.h"
 #include "Timer.h"
 
@@ -26,68 +27,34 @@ void debugOut(string str, int color_code)
 #endif
 }
 
-// constructor
 MissionStateMachine::MissionStateMachine() {
 	// initialize the necessary components for our state machine
-	this->current_state = State::INIT;
+	
 	this->flags.state_entry = true;
 	this->flags.state_exit = false;
 
-	// state name string access
-	this->state_map[State::INIT] = "INIT";
-	this->state_map[State::CHECKING_PREARM] = "CHECKING_PREARM";
-	this->state_map[State::ARMING] = "ARMING";
-
-	// instantiate the sub-sm objects
-	this->in_offboard_sm = InOffboardStateMachine();
-}
-
-
-MissionStateMachine::State MissionStateMachine::getCurrentState(void)
-{
-	return this->current_state;
-}
-
-
-void MissionStateMachine::setCurrentState(MissionStateMachine::State state)
-{
-	this->current_state = state;
-}
-
-
-MissionStateMachine::Event MissionStateMachine::checkEvents()
-{
-	// get event from the front of the FIFO buffer (replace with priority buffer in future?)
-	Event event;
-
-	// if no events, return NO_EVENT
-	if (this->event_queue.empty()) {
-		return Event::NO_EVENT;
-	} 
-
-	// pop and return the event
-	event = this->event_queue.front();
-	this->event_queue.pop();
-	return event;
-}
-
-void MissionStateMachine::registerEvent(MissionStateMachine::Event event)
-{
-	// add the event to the queue
-	this->event_queue.push(event);
 }
 
 void MissionStateMachine::cycle(void)
 {
 
-	State next_state = this->current_state;
+	// prime the next state to be the same as the current state unless changed
+	MissionStates next_state = this->getCurrentState();
 
 	// check for events
-	Event event = this->checkEvents();
+	MissionEvents event = MissionEvents::NO_EVENT;//event_ptr->getValue();
+	Event * latest_event_ptr = this->checkEvents();
+	if (latest_event_ptr != nullptr)
+	{
+		cout << "there is an event to ingest" << endl;
+		MissionEvent* event_ptr = (MissionEvent *) latest_event_ptr;
+		event = event_ptr->getValue();
+	}
 
-	switch (this->current_state) {
+	// primary switch statement for the state machine
+	switch (this->getCurrentState()) {
 
-		case State::INIT:
+		case MissionStates::INIT:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -100,7 +67,7 @@ void MissionStateMachine::cycle(void)
 
 		if (true) {
 			debugOut("	Next state will be 'CHECKING_PREARM'...", CYAN);
-			next_state = State::CHECKING_PREARM;
+			next_state = MissionStates::CHECKING_PREARM;
 			this->flags.state_exit = true;
 		}
 
@@ -113,7 +80,8 @@ void MissionStateMachine::cycle(void)
 
 		break;
 
-		case State::CHECKING_PREARM:
+
+		case MissionStates::CHECKING_PREARM:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -125,10 +93,10 @@ void MissionStateMachine::cycle(void)
 		// here, we wait until the system is done checking that everything which
 		// should be done prior to arming has been completed
 
-		if (event == Event::CHECKS_PREARM_COMPLETE) {
+		if (event == MissionEvents::CHECKS_PREARM_COMPLETE) {
 			debugOut("	Prearming checks have completed.", YELLOW);
 			debugOut("	Next state will be 'ARMING'...", CYAN);
-			next_state = State::ARMING;
+			next_state = MissionStates::ARMING;
 			this->flags.state_exit = true;
 		}
 
@@ -140,8 +108,9 @@ void MissionStateMachine::cycle(void)
 		}
 
 		break;
+		/*
 
-		case State::ARMING:
+		case MissionStates::ARMING:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -151,10 +120,10 @@ void MissionStateMachine::cycle(void)
 
 		// STATE TRANSFER CONDITIONS 
 		// when the system finishes arming, transition into takeoff
-		if (event == Event::AIRCRAFT_ARMED) {
+		if (event == MissionEvents::AIRCRAFT_ARMED) {
 			debugOut("	Aricraft is now armed.", YELLOW);
 			debugOut("	Next state will be 'TAKING_OFF'...", CYAN);
-			next_state = State::TAKING_OFF;
+			next_state = MissionStates::TAKING_OFF;
 			this->flags.state_exit = true;
 		}
 
@@ -168,7 +137,7 @@ void MissionStateMachine::cycle(void)
 
 		break;
 
-		case State::TAKING_OFF:
+		case MissionStates::TAKING_OFF:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -178,10 +147,10 @@ void MissionStateMachine::cycle(void)
 
 		// STATE TRANSFER CONDITIONS 
 		// once takeoff is finished, we can run the mission
-		if (event == Event::TAKEOFF_COMPLETE) {
+		if (event == MissionEvents::TAKEOFF_COMPLETE) {
 			debugOut("	Takeoff altitude has been reached -- takeoff is now complete.", YELLOW);
 			debugOut("	Next state will be 'IN_OFFBOARD'...", CYAN);
-			next_state = State::IN_OFFBOARD;
+			next_state = MissionStates::IN_OFFBOARD;
 			this->flags.state_exit = true;
 		}
 
@@ -195,7 +164,7 @@ void MissionStateMachine::cycle(void)
 
 		break;
 
-		case State::IN_OFFBOARD:
+		case MissionStates::IN_OFFBOARD:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -207,10 +176,10 @@ void MissionStateMachine::cycle(void)
 
 		// STATE TRANSFER CONDITIONS 
 		// once takeoff is finished, we can run the mission
-		if (event == Event::OFFBOARD_MISSION_COMPLETE) {
+		if (event == MissionEvents::OFFBOARD_MISSION_COMPLETE) {
 			debugOut("	Mission completed.", YELLOW);
 			debugOut("	Next state will be 'RETURNING_TO_HOME'...", CYAN);
-			next_state = State::RETURNING_TO_HOME;
+			next_state = MissionStates::RETURNING_TO_HOME;
 			this->flags.state_exit = true;
 		}
 
@@ -223,7 +192,7 @@ void MissionStateMachine::cycle(void)
 
 		break;
 
-		case State::RETURNING_TO_HOME:
+		case MissionStates::RETURNING_TO_HOME:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -233,10 +202,10 @@ void MissionStateMachine::cycle(void)
 
 		// STATE TRANSFER CONDITIONS 
 		// once takeoff is finished, we can run the mission
-		if (event == Event::REACHED_HOME_COORDS) {
+		if (event == MissionEvents::REACHED_HOME_COORDS) {
 			debugOut("	Got pack to the lat/lon for home.", YELLOW);
 			debugOut("	Next state will be 'LANDING'...", CYAN);
-			next_state = State::LANDING;
+			next_state = MissionStates::LANDING;
 			this->flags.state_exit = true;
 		}
 
@@ -249,7 +218,7 @@ void MissionStateMachine::cycle(void)
 
 		break;
 
-		case State::LANDING:
+		case MissionStates::LANDING:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -259,10 +228,10 @@ void MissionStateMachine::cycle(void)
 
 		// STATE TRANSFER CONDITIONS 
 		// once takeoff is finished, we can run the mission
-		if (event == Event::TOUCHED_DOWN) {
+		if (event == MissionEvents::TOUCHED_DOWN) {
 			debugOut("	We've landed.", YELLOW);
 			debugOut("	Next state will be 'DISARMING'...", CYAN);
-			next_state = State::DISARMING;
+			next_state = MissionStates::DISARMING;
 			this->flags.state_exit = true;
 		}
 
@@ -275,7 +244,7 @@ void MissionStateMachine::cycle(void)
 
 		break;
 
-		case State::DISARMING:
+		case MissionStates::DISARMING:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -285,10 +254,10 @@ void MissionStateMachine::cycle(void)
 
 		// STATE TRANSFER CONDITIONS 
 		// once takeoff is finished, we can run the mission
-		if (event == Event::DISARMED) {
+		if (event == MissionEvents::DISARMED) {
 			debugOut("	We've disarmed.", YELLOW);
 			debugOut("	Next state will be 'EXIT'...", CYAN);
-			next_state = State::EXIT;
+			next_state = MissionStates::EXIT;
 			this->flags.state_exit = true;
 		}
 
@@ -302,7 +271,7 @@ void MissionStateMachine::cycle(void)
 		break;
 
 
-		case State::EXIT:
+		case MissionStates::EXIT:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
@@ -311,6 +280,7 @@ void MissionStateMachine::cycle(void)
 		}
 
 		break;
+		*/
 
 		default:
 		
@@ -320,194 +290,6 @@ void MissionStateMachine::cycle(void)
 		break;
 	}
 
-	this->current_state = next_state;
+	this->setCurrentState( next_state );
 }
 
-
-
-InOffboardStateMachine::InOffboardStateMachine()
-{
-	// initialize the necessary components for our state machine
-	this->current_state = State::INIT;
-	this->flags.state_entry = true;
-	this->flags.state_exit = false;
-
-	// state name string access
-	this->state_map[State::INIT] = "INIT";
-	this->state_map[State::SETTING_TARGET] = "SETTING_TARGET";
-	this->state_map[State::CYCLING] = "CYCLING";
-	this->state_map[State::STALLING_POST_WP_HIT] = "STALLING_POST_WP_HIT";
-}
-
-InOffboardStateMachine::State InOffboardStateMachine::getCurrentState(void)
-{
-	return this->current_state;
-}
-
-
-void InOffboardStateMachine::setCurrentState(InOffboardStateMachine::State state)
-{
-	this->current_state = state;
-}
-
-
-InOffboardStateMachine::Event InOffboardStateMachine::checkEvents()
-{
-	// get event from the front of the FIFO buffer (replace with priority buffer in future?)
-	Event event;
-
-	// if no events, return NO_EVENT
-	if (this->event_queue.empty()) {
-		return Event::NO_EVENT;
-	} 
-
-	// pop and return the event
-	event = this->event_queue.front();
-	this->event_queue.pop();
-	return event;
-}
-
-void InOffboardStateMachine::registerEvent(InOffboardStateMachine::Event event)
-{
-	// add the event to the queue
-	this->event_queue.push(event);
-}
-
-
-	//for reference:
-	//enum class State {INIT, SETTING_TARGET, CYCLING, STALLING_POST_WP_HIT}; 
-	//enum class Event {WAYPOINT_HIT, POST_WP_HIT_TIMER_STARTED, POST_WP_HIT_TIMER_FINISHED};
-
-// main body of the state machine
-void InOffboardStateMachine::cycle()
-{
-
-	// unless a new state is to be traversed to, keep the same state
-	State next_state = this->current_state;
-
-	// check for events
-	Event event = this->checkEvents();
-
-	//sub state machine for offboard mode
-	switch (this->current_state) {
-
-		case State::INIT:
-
-		if (this->flags.state_entry == true) {
-			// state entry execution
-			debugOut("	In state 'INIT'...", BLUE);
-			this->flags.state_entry = false;
-		}
-
-		// STATE TRANSFER CONDITIONS 
-		// only cycle through the init state once
-
-		if (true) {
-			debugOut("	Next state will be 'SETTING_TARGET'...", CYAN);
-			next_state = State::SETTING_TARGET;
-			this->flags.state_exit = true;
-		}
-
-		if (this->flags.state_exit == true) {
-			debugOut("	Exiting 'INIT'...", MAGENTA);
-			cout << endl;
-			this->flags.state_exit = false;
-			this->flags.state_entry = true;
-		}
-
-		break;
-
-		case State::SETTING_TARGET:
-
-		if (this->flags.state_entry == true) {
-			// state entry execution
-			debugOut("	In state 'SETTING_TARGET'...", BLUE);
-			this->flags.state_entry = false;
-
-			//set the target here -- we'll otherwise be idle in this state
-
-		}
-
-		// we only needed to set the target, so now we can go into cycling
-		if (true) {
-			debugOut("	Next state will be 'CYCLING'...", CYAN);
-			next_state = State::CYCLING;
-			this->flags.state_exit = true;
-		}
-
-		if (this->flags.state_exit == true) {
-			debugOut("	Exiting 'SETTING_TARGET'...", MAGENTA);
-			cout << endl;
-			this->flags.state_exit = false;
-			this->flags.state_entry = true;
-		}
-
-		break;
-
-		case State::CYCLING:
-
-		if (this->flags.state_entry == true) {
-			// state entry execution
-			debugOut("	In state 'CYCLING'...", BLUE);
-			this->flags.state_entry = false;
-		}
-
-		// we're cycling the setpoint value currently, so now we need to wait unti we
-		// hit the waypoint.
-
-		if (event == Event::WAYPOINT_HIT) {
-			debugOut("	The waypoint has been hit.", YELLOW);
-			debugOut("	Next state will be 'STALLING_POST_WP_HIT'...", CYAN);
-			next_state = State::STALLING_POST_WP_HIT;
-			this->flags.state_exit = true;
-		}
-
-		if (this->flags.state_exit == true) {
-			debugOut("	Exiting 'CYCLING'...", MAGENTA);
-			cout << endl;
-			this->flags.state_exit = false;
-			this->flags.state_entry = true;
-		}
-
-		break;
-
-		case State::STALLING_POST_WP_HIT:
-
-		if (this->flags.state_entry == true) {
-			// state entry execution
-			debugOut("	In state 'STALLING_POST_WP_HIT'...", BLUE);
-			this->flags.state_entry = false;
-
-			// this is where to start the stall timer
-		}
-
-		// we're cycling the setpoint value currently, so now we need to wait unti we
-		// hit the waypoint.
-
-		if (false) {
-			debugOut("	The waypoint stall timer has now run out.", YELLOW);
-			debugOut("	Next state will be 'SETTING_TARGET'...", CYAN);
-			next_state = State::STALLING_POST_WP_HIT;
-			this->flags.state_exit = true;
-		}
-
-		if (this->flags.state_exit == true) {
-			debugOut("	Exiting 'STALLING_POST_WP_HIT'...", MAGENTA);
-			cout << endl;
-			this->flags.state_exit = false;
-			this->flags.state_entry = true;
-		}
-
-		break;
-
-
-		default:
-
-		debugOut("ERROR: dropped into default state -- state machine has lost state!", RED);
-		cout << endl;
-
-		break;
-	}
-
-	this->current_state = next_state;
-}

@@ -13,18 +13,52 @@ class Event
 {
 	public:
 	Event() {};
-	virtual ~Event() {};
 	Event( Events val ) { this->val = val; };
+	virtual ~Event() {};
+
+	// value getter
+	Events getValue() { return this->val; };
+
+	// value setter
+	virtual void setValue(Events val) { this->val = val; };
+
+	private:
 	Events val;
 };
 
+enum class States { INIT };
+
+class State
+{
+	public:
+	State() {};
+	State( States val ) { this->val = val; };
+	virtual ~State() {};
+
+	// value getter
+	States getValue() { cout << "why?" << endl; return this->val; }; 
+
+/*
+
+	// value setter
+	virtual void setValue(States val) { this->val = val; };
+*/
+
+	private:
+	States val;
+};
 
 class StateMachine
 {
 	public:
-	StateMachine() {};
-	virtual ~StateMachine() {};
+	StateMachine();
+
+	// primary method : requires implementation in derived classes
+	virtual void cycle() = 0;
 	
+	// method for ingesting the events we need to process
+	void registerEvents( queue<Event*>& events_to_register_q );
+
 	// methods for assessing the event type (abstracted through the following method for 
 	// ease of overriding
 	template<typename EventType>
@@ -39,37 +73,30 @@ class StateMachine
 	// override this method in each derived state Machine, replacing the template param
 	virtual bool isAValidEvent( Event* event ) { return checkValidEvent<Event *>( event ); }
 
-	// method for ingesting the events we need to process
-	void registerEvents( queue<Event*>& events_to_register_q )
-	{
-		// add events to this state machine to be processed
-		queue<Event*> unprocessed_events;
-		while ( !events_to_register_q.empty() )
-		{
-			cout << "processing an event..." << endl;
-			Event* event_ptr = events_to_register_q.front();
-			if ( this->isAValidEvent( event_ptr ) ) {
-				cout << "	... adding this event to the locally maintained queue." << endl;
-				this->event_queue.push( event_ptr );
-			} else {
-				cout << "	...event is not valid for this sm. passing to substates..." << endl;
-				unprocessed_events.push( event_ptr );
-			}
-			events_to_register_q.pop();
-		}
-
-
-		// pass unprocessed events to the substate machines
-		for ( StateMachine * sub_state_machine : this->sub_state_machines )
-		{ 
-			sub_state_machine->registerEvents( unprocessed_events );
-		}
-	}
-
+/*
+	// adds a pointer to a sub state machine for the event processing chain
 	void addSubStateMachine( StateMachine* sub_state_machine ) { this->sub_state_machines.push_back( sub_state_machine ); }
 
-	private:
+	*/
+	// get the event at the front of our queue
+	Event* checkEvents();
 
+	//getters
+	State* getCurrentState(void);
+
+
+	//setters
+	void setCurrentState( State * );
+
+	private:
 	vector<StateMachine *> sub_state_machines;
-	queue<Event*> event_queue;
+
+	protected:
+	queue<Event*> event_ptr_queue;
+	State* current_state_ptr;
+	struct transition_flags {
+		bool state_entry;
+		bool state_exit;
+	} flags;
+
 };
