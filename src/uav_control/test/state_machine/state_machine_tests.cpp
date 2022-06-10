@@ -73,6 +73,18 @@ bool assert_nullptr(auto a, string test_desc = "")
 
 using namespace testing;
 
+/* TESTS AND DESCRIPTIONS -- fill this out before any more tests written!
+
+methods:
+	- getCurrentState
+	- setCurrentState
+	- registerEvents
+	- isAValidEvent
+	- checkValidEvent
+	- checkEvents
+
+*/
+
 namespace method_tests
 {
 	int getCurrentState_test_1()
