@@ -90,6 +90,8 @@ class StateMachine
 
 	// getters
 	int getCurrentState() { return this->current_state_ptr->value(); };
+	int eventQueueSize() { return this->event_queue.size(); };
+	bool eventQueueEmpty() { return this->event_queue.empty(); };
 	
 	// setters
 	void setCurrentState( int state ) { this->current_state_ptr->value() = state; };
