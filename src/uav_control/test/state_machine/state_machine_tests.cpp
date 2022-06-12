@@ -76,12 +76,18 @@ using namespace testing;
 /* TESTS AND DESCRIPTIONS -- fill this out before any more tests written!
 
 methods:
-	- getCurrentState
-	- setCurrentState
-	- registerEvents
-	- isAValidEvent
+	- getCurrentState DONE
+	- setCurrentState DONE
+	- registerEvents DONE
+	- isAValidEvent 
 	- checkValidEvent
-	- checkEvents
+	- checkEvents DONE
+
+main function:
+	- cycle
+		- state transitions
+			- into/out of sub-state machines
+		- registering events
 
 */
 
@@ -213,8 +219,100 @@ namespace method_tests
 		
 } // namespace method_tests END
 
+namespace execution_tests
+{
+
+	int STATE_1_to_STATE_2_transition_test_1()
+	{
+		MyStateMachine sm;
+
+		// cycle the state machine
+		sm.cycle();
+
+		// pass an event to the state machine
+		queue<StateMachine::Event *> events_to_reg_q; // this exists on the stack, declared up top
+		events_to_reg_q .push( new MyStateMachine::Event( MyStateMachine::Event::AN_EVENT ) );
+		sm.registerEvents( events_to_reg_q );
+
+		// cycle a couple more times
+		sm.cycle();
+		sm.cycle();
+
+		// check that we're in the next state now
+		int current_state = sm.getCurrentState();
+		return assert_eq( current_state, MyStateMachine::State::STATE_2, "Checking that we're now in STATE_2" );
+	}
+
+	int STATE_1_to_STATE_2_nontransition_test_1()
+	{
+		MyStateMachine sm;
+
+		// cycle the state machine
+		sm.cycle();
+
+		// pass an event to the state machine
+		queue<StateMachine::Event *> events_to_reg_q; // this exists on the stack, declared up top
+		events_to_reg_q .push( new TheirStateMachine::Event( TheirStateMachine::Event::AN_EVENT ) );
+		sm.registerEvents( events_to_reg_q );
+
+		// cycle a couple more times
+		sm.cycle();
+		sm.cycle();
+
+		// check that we haven't transitioned state since it was the wrong type of event
+		int current_state = sm.getCurrentState();
+		return assert_eq( current_state, MyStateMachine::State::STATE_1, "Checking that we've stayed in STATE_1" );
+	}
+
+
+	int STATE_1_to_STATE_2_transition_test_2()
+	{
+		TheirStateMachine sm;
+
+		// cycle the state machine
+		sm.cycle();
+
+		// pass an event to the state machine
+		queue<StateMachine::Event *> events_to_reg_q; // this exists on the stack, declared up top
+		events_to_reg_q .push( new TheirStateMachine::Event( TheirStateMachine::Event::AN_EVENT ) );
+		sm.registerEvents( events_to_reg_q );
+
+		// cycle a couple more times
+		sm.cycle();
+		sm.cycle();
+
+		// check that we're in the next state now
+		int current_state = sm.getCurrentState();
+		return assert_eq( current_state, TheirStateMachine::State::STATE_2, "Checking that we're now in STATE_2 for top level sm that has a sub sm" );
+	}
+
+	int STATE_1_to_STATE_2_nontransition_test_1()
+	{
+		MyStateMachine sm;
+
+		// cycle the state machine
+		sm.cycle();
+
+		// pass an event to the state machine
+		queue<StateMachine::Event *> events_to_reg_q; // this exists on the stack, declared up top
+		events_to_reg_q .push( new TheirStateMachine::Event( TheirStateMachine::Event::AN_EVENT ) );
+		sm.registerEvents( events_to_reg_q );
+
+		// cycle a couple more times
+		sm.cycle();
+		sm.cycle();
+
+		// check that we haven't transitioned state since it was the wrong type of event
+		int current_state = sm.getCurrentState();
+		return assert_eq( current_state, MyStateMachine::State::STATE_1, "Checking that we've stayed in STATE_1" );
+	}
+
+
+}
+
 
 using namespace method_tests;
+using namespace execution_tests;
 
 int main( void )
 {
@@ -310,6 +408,36 @@ int main( void )
         std::cout << "Test succeeded." << std::endl;
     }
 	std::cout << std::endl;
+	
+    std::cout << "Test 11: test transitioning states in a top-level sm" << std::endl;
+    result = STATE_1_to_STATE_2_transition_test_1();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
+	
+    std::cout << "Test 11: test not transitioning states when an event for a different sm with same name passed" << std::endl;
+    result = STATE_1_to_STATE_2_nontransition_test_1();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
+
+    std::cout << "Test 12: transition states in a sub-sm" << std::endl;
+    result = STATE_1_to_STATE_2_nontransition_test_1();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
+
+
+	
 	
 
 

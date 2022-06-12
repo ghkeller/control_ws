@@ -100,5 +100,10 @@ class StateMachine
 	State *current_state_ptr;
 	queue<Event *> event_queue;
 	vector<StateMachine *> sub_SMs;
+
+	struct flags {
+		bool state_entry = true;
+		bool state_exit = false;
+	} flags;
 };
 
