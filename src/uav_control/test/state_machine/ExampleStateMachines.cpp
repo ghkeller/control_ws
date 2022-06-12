@@ -48,7 +48,7 @@ void MyStateMachine::cycle()
 
 		if (this->flags.state_entry == true) {
 			// state entry execution
-			debugOut("	In state 'STATE_1'...", BLUE);
+			debugOut("	In state 'STATE_1 of MyStateMachine instance'...", BLUE);
 			this->flags.state_entry = false;
 		}
 
@@ -56,13 +56,13 @@ void MyStateMachine::cycle()
 
 		if (event == MyStateMachine::Event::AN_EVENT) {
 			debugOut(" The event happened. ", YELLOW);
-			debugOut("	Next state will be 'STATE_2'...", CYAN);
+			debugOut("	Next state will be 'STATE_2' of MyStateMachine instance...", CYAN);
 			next_state = MyStateMachine::State::STATE_2;
 			this->flags.state_exit = true;
 		}
 
 		if (this->flags.state_exit == true) {
-			debugOut("	Exiting 'STATE_1'...", MAGENTA);
+			debugOut("	Exiting 'STATE_1' of MyStateMachine instance...", MAGENTA);
 			cout << endl;
 			this->flags.state_exit = false;
 			this->flags.state_entry = true;
@@ -74,14 +74,14 @@ void MyStateMachine::cycle()
 
 		if (this->flags.state_entry == true) {
 			// state entry execution
-			debugOut("	In state 'STATE_2'...", BLUE);
+			debugOut("	In state 'STATE_2' of MyStateMachine instance...", BLUE);
 			this->flags.state_entry = false;
 		}
 
 		// STATE TRANSFER CONDITIONS 
 
 		if (this->flags.state_exit == true) {
-			debugOut("	Exiting 'STATE_2'...", MAGENTA);
+			debugOut("	Exiting 'STATE_2' of MyStateMachine instance...", MAGENTA);
 			cout << endl;
 			this->flags.state_exit = false;
 			this->flags.state_entry = true;
@@ -108,10 +108,73 @@ void TheirStateMachine::cycle()
 
 
 	// check for events to ingest
-	Event* event = (Event*) this->checkEvents();
+	Event* event_ptr = (Event*) this->checkEvents();
+	int event;
+	if (event_ptr == nullptr)
+		event = Event::NO_EVENT;
+	else
+		event = event_ptr->value();
 
 	switch (current_state)
 	{
+
+	case State::STATE_1:
+
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'STATE_1'. of TheirStateMachine instance..", BLUE);
+			this->flags.state_entry = false;
+		}
+
+		// STATE TRANSFER CONDITIONS 
+
+		if (event == TheirStateMachine::Event::AN_EVENT) {
+			debugOut(" The event happened. ", YELLOW);
+			debugOut("	Next state will be 'STATE_2' of TheirStateMachine instance...", CYAN);
+			next_state = MyStateMachine::State::STATE_2;
+			this->flags.state_exit = true;
+		}
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'STATE_1' of TheirStateMachine instance...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+		}
+	
+	break;
+
+	case State::STATE_2:
+
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'STATE_2' of TheirStateMachine instance...", BLUE);
+			this->flags.state_entry = false;
+
+			// instantiate the sub-state machine
+			this->my_sub_sm = new MyStateMachine();
+			this->active_sub_sm = this->my_sub_sm;
+		}
+
+
+		// this is where we enter the sub-state machine
+		this->my_sub_sm->cycle();
+
+		// STATE TRANSFER CONDITIONS 
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'STATE_2' of TheirStateMachine instance...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+
+			// de-activate the sub state machine
+			delete this->my_sub_sm;
+			this->active_sub_sm = nullptr;
+		}
+	
+	break;
+
 	default:
 
 	break;

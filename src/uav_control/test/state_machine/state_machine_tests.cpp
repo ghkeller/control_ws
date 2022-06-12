@@ -73,7 +73,7 @@ bool assert_nullptr(auto a, string test_desc = "")
 
 using namespace testing;
 
-/* TESTS AND DESCRIPTIONS -- fill this out before any more tests written!
+/* TESTS AND DESCRIPTIONS
 
 methods:
 	- getCurrentState DONE
@@ -87,6 +87,7 @@ main function:
 	- cycle
 		- state transitions
 			- into/out of sub-state machines
+			- testing the pointer value of the sub state machine
 		- registering events
 
 */
@@ -286,9 +287,31 @@ namespace execution_tests
 		return assert_eq( current_state, TheirStateMachine::State::STATE_2, "Checking that we're now in STATE_2 for top level sm that has a sub sm" );
 	}
 
-	int STATE_1_to_STATE_2_nontransition_test_1()
+	int STATE_1_to_STATE_2_nontransition_test_2()
 	{
-		MyStateMachine sm;
+		TheirStateMachine sm;
+
+		// cycle the state machine
+		sm.cycle();
+
+		// pass an event to the state machine
+		queue<StateMachine::Event *> events_to_reg_q; // this exists on the stack, declared up top
+		events_to_reg_q .push( new MyStateMachine::Event( MyStateMachine::Event::AN_EVENT ) );
+		sm.registerEvents( events_to_reg_q );
+
+		// cycle a couple more times
+		sm.cycle();
+		sm.cycle();
+
+		// check that we haven't transitioned state since it was the wrong type of event
+		int current_state = sm.getCurrentState();
+		return assert_eq( current_state, TheirStateMachine::State::STATE_1, "Checking that we've stayed in STATE_1" );
+	}
+
+
+	int STATE_1_to_STATE_2_in_sub_sm_transition_test_2()
+	{
+		TheirStateMachine sm;
 
 		// cycle the state machine
 		sm.cycle();
@@ -302,9 +325,21 @@ namespace execution_tests
 		sm.cycle();
 		sm.cycle();
 
+		// we're now in STATE_2 which has a sub-state machine that it has and will cycle
+		// while in this state. Pass the eveent to make the sub-state machine cycle
+
+		// pass an event to the state machine
+		events_to_reg_q .push( new MyStateMachine::Event( MyStateMachine::Event::AN_EVENT ) );
+		sm.registerEvents( events_to_reg_q );
+
+		// cycle a couple more times
+		sm.cycle();
+		sm.cycle();
+
+
 		// check that we haven't transitioned state since it was the wrong type of event
 		int current_state = sm.getCurrentState();
-		return assert_eq( current_state, MyStateMachine::State::STATE_1, "Checking that we've stayed in STATE_1" );
+		return assert_eq( current_state, TheirStateMachine::State::STATE_2, "Checking that we're in STATE_2, and check output for sub-sm stuff" );
 	}
 
 
@@ -428,7 +463,7 @@ int main( void )
 	std::cout << std::endl;
 
     std::cout << "Test 12: transition states in a sub-sm" << std::endl;
-    result = STATE_1_to_STATE_2_nontransition_test_1();
+    result = STATE_1_to_STATE_2_transition_test_2();
     if ( result == false ) {
         std::cout << "Test failed." << std::endl;
     } else {
@@ -436,11 +471,23 @@ int main( void )
     }
 	std::cout << std::endl;
 
+    std::cout << "Test 13: test that we will not transition in an sm with a sub sm with event for sub sm passed" << std::endl;
+    result = STATE_1_to_STATE_2_nontransition_test_2();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
 
-	
-	
-
-
+    std::cout << "Test 14: try to cycle through a state of the sub-sm" << std::endl;
+	result = STATE_1_to_STATE_2_in_sub_sm_transition_test_2();
+    if ( result == false ) {
+        std::cout << "Test failed." << std::endl;
+    } else {
+        std::cout << "Test succeeded." << std::endl;
+    }
+	std::cout << std::endl;
 
 
 /*

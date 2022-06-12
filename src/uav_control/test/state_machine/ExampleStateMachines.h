@@ -67,7 +67,6 @@ class TheirStateMachine : public StateMachine
 
 	TheirStateMachine () : StateMachine {} {
 		this->current_state_ptr = new State( State::STATE_1 );
-		this->sub_SMs.push_back( &( this->mySubSM ) );
 	}
 	virtual ~TheirStateMachine() {};
 	void cycle();
@@ -75,7 +74,7 @@ class TheirStateMachine : public StateMachine
 	bool isAValidEvent( StateMachine::Event* event_ptr ) { return checkValidEvent<TheirStateMachine::Event *>( event_ptr ); };
 
 	private:
-	MyStateMachine mySubSM = MyStateMachine();
+	MyStateMachine* my_sub_sm = nullptr;
 
 };
 

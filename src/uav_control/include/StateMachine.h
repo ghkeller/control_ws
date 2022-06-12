@@ -67,12 +67,9 @@ class StateMachine
 			events_to_register_q.pop();
 		}
 
-
-		// pass unprocessed events to the substate machines
-		for ( StateMachine * sub_state_machine : this->sub_SMs )
-		{ 
-			sub_state_machine->registerEvents( unprocessed_events );
-		}
+		// pass unprocessed events to the substate machine
+		if ( active_sub_sm != nullptr )
+			active_sub_sm->registerEvents( unprocessed_events );
 	}
 
 	// event checker which returns the next event in the FIFO
@@ -99,7 +96,7 @@ class StateMachine
 	protected:
 	State *current_state_ptr;
 	queue<Event *> event_queue;
-	vector<StateMachine *> sub_SMs;
+	StateMachine* active_sub_sm = nullptr;
 
 	struct flags {
 		bool state_entry = true;
