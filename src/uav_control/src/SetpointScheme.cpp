@@ -55,9 +55,9 @@ uint16_t PositionTargetScheme::getCoordinateFrame()
 	return this->coord_frame;
 }
 
-bool PositionTargetScheme::queueEmpty(void)
+bool PositionTargetScheme::listEmpty(void)
 {
-	return this->setpoint_queue.empty();
+	return this->setpoint_list.empty();
 }
 
 
@@ -66,31 +66,31 @@ mavros_msgs::PositionTarget PositionTargetScheme::nextSetpoint(void)
 	mavros_msgs::PositionTarget ret_pt;
 
 	// check to make sure the queue has something in it
-	if (this->setpoint_queue.empty()) {
-		std::cerr << "Attempted to get the next setpoint from an empty queue" << std::endl;
+	if (this->setpoint_list.empty()) {
+		std::cerr << "Attempted to get the next setpoint from an empty list" << std::endl;
 		return ret_pt;
 	} 
 
-	ret_pt = this->setpoint_queue.front();
-	this->setpoint_queue.pop();
+	ret_pt = this->setpoint_list.front();
+	this->setpoint_list.pop();
 	return ret_pt;
 }
 
 int PositionTargetScheme::getSetpointQueueSize(void)
 {
-	return this->setpoint_queue.size();
+	return this->setpoint_list.size();
 }
 
 
 bool PositionTargetScheme::addSetpointToQueue(mavros_msgs::PositionTarget sp)
 {
 	// no ret value from push, so check queue size to verify push worked 
-	uint16_t queue_size_before = this->setpoint_queue.size();
-	this->setpoint_queue.push(sp);
-	uint16_t queue_size_after = this->setpoint_queue.size();
+	uint16_t list_size_before = this->setpoint_list.size();
+	this->setpoint_list.push(sp);
+	uint16_t list_size_after = this->setpoint_list.size();
 
-	if (queue_size_after - queue_size_before != 1) {
-		std::cerr << "Queue size did not increment after pushing -- element not added." << std::endl;
+	if (list_size_after - list_size_before != 1) {
+		std::cerr << "List size did not increment after pushing -- element not added." << std::endl;
 		return false;
 	}
 
