@@ -73,7 +73,7 @@ bool assert_nullptr(auto a, string test_desc = "")
 
 using namespace testing;
 
-/* TESTS AND DESCRIPTIONS
+/* TESTS AND DESCRIPTIOS
 
 methods:
 	- getCurrentState DONE
