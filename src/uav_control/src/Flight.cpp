@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <iostream>
 #include <queue>
+#include <ros/ros.h>
 
 #include "Flight.h"
 #include "Parsing.h"
@@ -54,7 +55,13 @@ bool Flight::load() {
 
 bool Flight::start()
 {
-	return true;
+	// we stay inside of here for now -- change later
+	while ( ros::ok() )
+	{
+		this->cycle();
+		ros::spinOnce();
+		this->rate.sleep();
+	}
 }
 
 bool Flight::stop()

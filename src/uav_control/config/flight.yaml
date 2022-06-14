@@ -1,5 +1,6 @@
 # flight yaml
 # used when launching fly_mission.launch and associated node(s)
+# eventually change the node to get the path to the flights directory
 
 control: {
 flight_fname: "/home/gordon/control_ws/src/uav_control/flights/good_flight.csv",

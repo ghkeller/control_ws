@@ -36,5 +36,6 @@ int main(int argc, char **argv)
 	// load the flight referenced in the yaml 
 	wp_flight.load();
 
-	ros::spin();
+	// start the flight
+	wp_flight.start();
 }

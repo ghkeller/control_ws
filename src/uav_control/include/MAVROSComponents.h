@@ -98,6 +98,9 @@ class MAVROSComponents
 	ros::ServiceClient set_mode_client;
 	ros::ServiceClient takeoff_client;
 
+	// other ros elements
+    ros::Rate rate = ros::Rate(10.0);
+
 	// mission details
 	std::string flight_name;
 	double waypoint_distance_hit_thresh;
