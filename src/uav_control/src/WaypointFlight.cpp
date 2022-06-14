@@ -91,6 +91,8 @@ void WaypointFlight::cycle()
 			this->flags.state_exit = true;
 		}
 
+		// ACTIONS ON LOOP
+
 		if (this->current_vehicle_state.connected)
 		{
 			debugOut("	The vehicle fcu is connected via ROS.", YELLOW);
