@@ -18,15 +18,17 @@ class Flight: public StateMachine, public MAVROSComponents
 
 	// constructor with mission loading
 	Flight(std::string);
-	
-	private:
-	// attrs
-	PositionTargetScheme setpoint_scheme; // eventually abstract into SetpointScheme to have generality
+	virtual ~Flight() = default;
 
 	// funcs
+	bool load();
 	bool load(std::string);
 	bool start(void); // possibly change both of these bools to ints with assigned error vals
 	bool stop(void); 
 	bool pause(void); //true: pause or remain paused -- false: unpause or remain unpaused 
 	bool unpause(void); //true: pause or remain paused -- false: unpause or remain unpaused 
+	
+	protected:
+	// attrs
+	PositionTargetScheme setpoint_scheme; // eventually abstract into SetpointScheme to have generality
 };

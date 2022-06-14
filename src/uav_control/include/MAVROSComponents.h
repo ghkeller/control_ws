@@ -79,7 +79,7 @@ class MAVROSComponents
 	void position_cb(const geometry_msgs::PoseStamped::ConstPtr&);
 	void state_cb(const mavros_msgs::State::ConstPtr&);
 
-	private:
+	protected:
 
 	// node handle
 	ros::NodeHandle _nh;

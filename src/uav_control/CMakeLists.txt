@@ -125,7 +125,13 @@ include_directories(
 ## Declare a C++ library
 
 add_library(flight_lib
+  src/WaypointFlight.cpp
+  src/Flight.cpp
+  #include/StateMachine.h
   src/MAVROSComponents.cpp
+  src/SetpointScheme.cpp
+  src/Timer.cpp
+  src/Parsing.cpp
 )
 
 ## Add cmake target dependencies of the library
@@ -189,10 +195,11 @@ add_library(flight_lib
 #)
 #
 
-add_executable(test_mavros_components
-	src/test_mavros_components.cpp
+add_executable(test_separate_modules
+	src/test_separate_modules.cpp
 )
-target_link_libraries(test_mavros_components
+
+target_link_libraries(test_separate_modules
   flight_lib
   ${catkin_LIBRARIES}
 )

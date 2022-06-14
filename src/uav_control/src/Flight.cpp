@@ -40,6 +40,18 @@ bool Flight::load(std::string filename) {
 	return ret_val;
 }
 
+
+// parse out a flight from a file
+bool Flight::load() {
+	// setpoint scheme must be instantiated before we attempt to load a flight
+	bool ret_val = Parsing::flightFromCsv(this->flight_name, this->setpoint_scheme);
+	if (!ret_val)
+	{
+		std::cerr << "flightFromCSV failed." << std::endl;
+	}
+	return ret_val;
+}
+
 bool Flight::start()
 {
 	return true;

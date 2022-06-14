@@ -10,9 +10,6 @@
 #include "SetpointScheme.h"
 #include "mavros_msgs/PositionTarget.h"
 
-// deal with this for our queue (if we need it)
-// static int vec_iterator = 0;
-
 using namespace std;
 
 PositionTargetScheme::PositionTargetScheme()

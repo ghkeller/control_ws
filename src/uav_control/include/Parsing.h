@@ -12,5 +12,6 @@ class Parsing
 {
 	public:
 		static bool flightFromCsv(std::string, PositionTargetScheme&);
+
 	private:
 };

@@ -10,7 +10,6 @@
 #include "SetpointScheme.h"
 #include "mavros_msgs/PositionTarget.h"
 
-
 using namespace std;
 
 // static parsing func
@@ -152,7 +151,7 @@ bool Parsing::flightFromCsv(string _path_to_CSV, PositionTargetScheme& pts)
 	        }
 
 	        //save the position target struct to our vector
-    		pts.addSetpointToQueue(tp);
+    		pts.addSetpointToVec(tp);
     		cout << "Added position target to vector" << endl;
 	    }
 
