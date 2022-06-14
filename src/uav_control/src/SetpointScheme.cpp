@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstddef>
+#include <vector>
 
 /* local includes */
 #include "SetpointScheme.h"
@@ -28,9 +29,9 @@ void PositionTargetScheme::setName(string name)
 	return;
 }
 
-void PositionTargetScheme::setIgnoreFlags(uint16_t ignore_flags)
+void PositionTargetScheme::setIgnoreMask(uint16_t ignore_mask)
 {
-	this->ignore_flags = ignore_flags;
+	this->ignore_mask = ignore_mask;
 	return;
 }
 
@@ -45,9 +46,9 @@ string PositionTargetScheme::getName()
 	return this->name;
 }
 
-uint16_t PositionTargetScheme::getIgnoreFlags()
+uint16_t PositionTargetScheme::getIgnoreMask()
 {
-	return this->ignore_flags;
+	return this->ignore_mask;
 }
 
 uint16_t PositionTargetScheme::getCoordinateFrame()
@@ -55,42 +56,36 @@ uint16_t PositionTargetScheme::getCoordinateFrame()
 	return this->coord_frame;
 }
 
-bool PositionTargetScheme::listEmpty(void)
+bool PositionTargetScheme::vecEmpty(void)
 {
-	return this->setpoint_list.empty();
+	return this->setpoint_vec.empty();
 }
 
 
 mavros_msgs::PositionTarget PositionTargetScheme::nextSetpoint(void)
 {
-	mavros_msgs::PositionTarget ret_pt;
-
-	// check to make sure the queue has something in it
-	if (this->setpoint_list.empty()) {
-		std::cerr << "Attempted to get the next setpoint from an empty list" << std::endl;
-		return ret_pt;
-	} 
-
-	ret_pt = this->setpoint_list.front();
-	this->setpoint_list.pop();
-	return ret_pt;
+	this->setpoint_index++;
+	mavros_msgs::PositionTarget next_setpoint;
+	if (this->setpoint_index < setpoint_vec.size())
+		next_setpoint = this->setpoint_vec[this->setpoint_index];
+	return next_setpoint;
 }
 
-int PositionTargetScheme::getSetpointQueueSize(void)
+int PositionTargetScheme::getSetpointVecSize(void)
 {
-	return this->setpoint_list.size();
+	return this->setpoint_vec.size();
 }
 
 
-bool PositionTargetScheme::addSetpointToQueue(mavros_msgs::PositionTarget sp)
+bool PositionTargetScheme::addSetpointToVec(mavros_msgs::PositionTarget sp)
 {
 	// no ret value from push, so check queue size to verify push worked 
-	uint16_t list_size_before = this->setpoint_list.size();
-	this->setpoint_list.push(sp);
-	uint16_t list_size_after = this->setpoint_list.size();
+	uint16_t vec_size_before = this->setpoint_vec.size();
+	this->setpoint_vec.push_back(sp);
+	uint16_t vec_size_after = this->setpoint_vec.size();
 
-	if (list_size_after - list_size_before != 1) {
-		std::cerr << "List size did not increment after pushing -- element not added." << std::endl;
+	if (vec_size_after - vec_size_before != 1) {
+		std::cerr << "Vector size did not increment after pushing -- element not added." << std::endl;
 		return false;
 	}
 

@@ -2,26 +2,27 @@
 # used when launching fly_mission.launch and associated node(s)
 
 control: {
-	flight_fname: "flight_1.csv",
-	avoidance: false,
-	waypoint_distance_hit_thresh: 5.0,
-	waypoint_hit_wait_time: 2.0,
-	starting_waypoint_number: 0
+flight_fname: "flight_1.csv",
+avoidance: false,
+waypoint_distance_hit_thresh: 5.0,
+waypoint_hit_wait_time: 2.0,
+starting_waypoint_number: 0
 }
 
 mavros: {
-	#topics
-	state_topic: "/mavros/state"
-	pose_topic: "/mavros/local_position/pose"
-	setpoint_topic: "/mavthread/setpoint_raw/local"
+#topics
+state_topic: "/mavros/state",
+position_topic: "/mavros/local_position/pose",
+setpoint_topic: "/mavthread/setpoint_raw/local",
+target_topic: "/mavros/setpoint_raw/target_local",
 
-	#services
-	arming_service: "mavros/cmd/arming"
-	mode_service: "/mavros/set_mode"
-	takeoff_service: "/mavros/cmd/takeoff"
+#services
+arming_service: "mavros/cmd/arming",
+mode_service: "/mavros/set_mode",
+takeoff_service: "/mavros/cmd/takeoff"
 }
 
 gcs: {
-	alert_topic: "/gcs/vehicle_alert"
+alert_topic: "/gcs/vehicle_alert",
 }
 

@@ -74,7 +74,7 @@ class MAVROSComponents
 	void setupPublishers();
 
 	//callbacks
-	void gcs_alert_cb(const std_msgs::String::ConstPtr&);
+	//void gcs_alert_cb(const std_msgs::String::ConstPtr&);
 	void target_cb(const mavros_msgs::PositionTarget::ConstPtr&);
 	void position_cb(const geometry_msgs::PoseStamped::ConstPtr&);
 	void state_cb(const mavros_msgs::State::ConstPtr&);

@@ -12,7 +12,6 @@
 /* local includes */
 #include "MAVROSComponents.h"
 
-
 using namespace std;
 
 MAVROSComponents::MAVROSComponents()
@@ -44,9 +43,7 @@ void MAVROSComponents::fetchParams()
     this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/arming_service", this->arming_service); 
     this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/mode_service", this->set_mode_service);
     this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/takeoff_service", this->takeoff_service);
-
 }
-
 
 void MAVROSComponents::setupServices()
 {
@@ -67,8 +64,8 @@ void MAVROSComponents::setupSubscribers()
             (this->position_topic, 10, &MAVROSComponents::position_cb, this);
     this->target_sub = this->_nh.subscribe<mavros_msgs::PositionTarget>
             (this->target_topic, 10, &MAVROSComponents::target_cb, this);
-    this->gcs_alert_sub = this->_nh.subscribe<std_msgs::String>
-            (this->gcs_alert_topic, 10, &MAVROSComponents::gcs_alert_cb, this);
+    //this->gcs_alert_sub = this->_nh.subscribe<std_msgs::String>
+            //(this->gcs_alert_topic, 10, &MAVROSComponents::gcs_alert_cb, this);
 
 }
 

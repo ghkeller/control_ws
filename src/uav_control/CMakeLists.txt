@@ -118,8 +118,8 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-# include
-  ${catkin_INCLUDE_DIRS}
+	include
+  	${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -159,31 +159,40 @@ include_directories(
 #  ${catkin_LIBRARIES}
 #)
 
-add_executable(uav_control_node
-  src/uav_node_v2.cpp
-)
-target_link_libraries(uav_control_node
-  ${catkin_LIBRARIES}
-)
+#add_executable(uav_control_node
+#  src/uav_node_v2.cpp
+#)
+#target_link_libraries(uav_control_node
+#   ${catkin_LIBRARIES}
+#)
+#
+#add_executable(setpoint_position_buffer_node
+#  src/offb_sp_pos_thread.cpp
+# )
+#target_link_libraries(setpoint_position_buffer_node
+#  ${catkin_LIBRARIES}
+#)
+#
+#add_executable(setpoint_raw_buffer_node
+#   src/offb_sp_raw_thread.cpp
+#)
+#target_link_libraries(setpoint_raw_buffer_node
+#  ${catkin_LIBRARIES}
+# )
+#
+#add_executable(vis_pos_update_thread
+#  src/vis_pos_update_thread.cpp
+#)
+# target_link_libraries(vis_pos_update_thread
+#  ${catkin_LIBRARIES}
+#)
+#
 
-add_executable(setpoint_position_buffer_node
-  src/offb_sp_pos_thread.cpp
+add_executable(test_mavros_components
+	src/test_mavros_components.cpp
+	src/MAVROSComponents.cpp
 )
-target_link_libraries(setpoint_position_buffer_node
-  ${catkin_LIBRARIES}
-)
-
-add_executable(setpoint_raw_buffer_node
-  src/offb_sp_raw_thread.cpp
-)
-target_link_libraries(setpoint_raw_buffer_node
-  ${catkin_LIBRARIES}
-)
-
-add_executable(vis_pos_update_thread
-  src/vis_pos_update_thread.cpp
-)
-target_link_libraries(vis_pos_update_thread
+target_link_libraries(test_mavros_components
   ${catkin_LIBRARIES}
 )
 

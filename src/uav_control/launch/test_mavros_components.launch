@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <!-- get default parameters from yaml -->
+	<rosparam file="$(find uav_control)/config/flight.yaml" />
+
+    <!-- start the main node -->
+    <node name="test_mavros_components" pkg="uav_control" type="test_mavros_components" output="screen">
+    </node>
+</launch>

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <cstddef>
-#include <list>
+#include <vector>
 
 /* local includes */
 #include "mavros_msgs/PositionTarget.h"
@@ -18,8 +18,9 @@ class PositionTargetScheme
     PositionTargetScheme();
 
 	/* methods */
-	int setpointListSize(void);
-	bool addSetpointToList(mavros_msgs::PositionTarget);
+	int setpointVecSize(void);
+	bool addSetpointToVec(mavros_msgs::PositionTarget);
+	int getSetpointVecSize();
 	mavros_msgs::PositionTarget nextSetpoint();
 
 	/* setters */
@@ -32,14 +33,14 @@ class PositionTargetScheme
 	string getName(void);
 	uint16_t getIgnoreMask(void);
 	uint16_t getCoordinateFrame(void);
-	bool listEmpty(void);
+	bool vecEmpty(void);
 
     private:
 	string name;
-	uint16_t ignore_flags;
+	uint16_t ignore_mask;
 	uint16_t coord_frame;
-	list<mavros_msgs::PositionTarget> setpoint_list;
-	int setpoint_index;
+	vector<mavros_msgs::PositionTarget> setpoint_vec;
+	int setpoint_index = -1; // since we start with 'next sepoint' method
 
     protected:
 
