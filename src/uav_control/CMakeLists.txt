@@ -123,9 +123,10 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/uav_control.cpp
-# )
+
+add_library(flight_lib
+  src/MAVROSComponents.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -190,9 +191,9 @@ include_directories(
 
 add_executable(test_mavros_components
 	src/test_mavros_components.cpp
-	src/MAVROSComponents.cpp
 )
 target_link_libraries(test_mavros_components
+  flight_lib
   ${catkin_LIBRARIES}
 )
 
