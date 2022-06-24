@@ -4,6 +4,6 @@
 	<rosparam file="$(find uav_control)/config/flight.yaml" />
 
     <!-- start the main node -->
-    <node name="test_separate_modules" pkg="uav_control" type="test_separate_modules" output="screen">
+    <node ns="uav_1" name="test_separate_modules" pkg="uav_control" type="test_separate_modules" output="screen">
     </node>
 </launch>

@@ -57,8 +57,8 @@ void WaypointFlight::cycle()
 		// only cycle through the init state once
 
 		if (true) {
-			debugOut("	Next state will be 'CHECKING_PREARM'...", CYAN);
-			next_state = WaypointFlight::State::CHECKING_PREARM;
+			debugOut("	Next state will be 'WAITING_FOR_CONNECTION'...", CYAN);
+			next_state = WaypointFlight::State::WAITING_FOR_CONNECTION;
 			this->flags.state_exit = true;
 		}
 
@@ -71,38 +71,28 @@ void WaypointFlight::cycle()
 
 		break;
 
-
-		case WaypointFlight::State::CHECKING_PREARM:
+		case WaypointFlight::State::WAITING_FOR_CONNECTION:
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
-			debugOut("	In state 'CHECKING_PREARM'...", BLUE);
+			debugOut("	In state 'WAITING_FOR_CONNECTION'...", BLUE);
 			this->flags.state_entry = false;
 		}
 
 		// STATE TRANSFER CONDITIONS 
-		// here, we wait until the system is done checking that everything which
-		// should be done prior to arming has been completed
+		// wait until we're connected
 
-		if (event == WaypointFlight::Event::CHECKS_PREARM_COMPLETE) {
-			debugOut("	Prearming checks have completed.", YELLOW);
-			debugOut("	Next state will be 'ARMING'...", CYAN);
-			next_state = WaypointFlight::State::ARMING;
-			this->flags.state_exit = true;
+		if (this->current_vehicle_state.connected) {
+			debugOut("	We're connected to the vehicle.", YELLOW);
+			debugOut("	Next state will be 'SETTING_OFFBOARD_MODE'...", CYAN);
+			//next_state = WaypointFlight::State::ARMING;
+			//this->flags.state_exit = true;
 		}
 
 		// ACTIONS ON LOOP
 
-		if (this->current_vehicle_state.connected)
-		{
-			debugOut("	The vehicle fcu is connected via ROS.", YELLOW);
-			queue<StateMachine::Event *> events( { new WaypointFlight::Event( WaypointFlight::Event::CHECKS_PREARM_COMPLETE ) } );
-			this->registerEvents( events );
-		}
-			
-
 		if (this->flags.state_exit == true) {
-			debugOut("	Exiting 'CHECKING_PREARM'...", MAGENTA);
+			debugOut("	Exiting 'WAITING_FOR_CONNECTION'...", MAGENTA);
 			cout << endl;
 			this->flags.state_exit = false;
 			this->flags.state_entry = true;

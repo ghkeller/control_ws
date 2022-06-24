@@ -47,6 +47,7 @@ void MAVROSComponents::fetchParams()
 
 void MAVROSComponents::setupServices()
 {
+	
     this->arming_client = this->_nh.serviceClient<mavros_msgs::CommandBool>
             (this->arming_service);
     this->set_mode_client = this->_nh.serviceClient<mavros_msgs::SetMode>
@@ -58,10 +59,13 @@ void MAVROSComponents::setupServices()
 void MAVROSComponents::setupSubscribers()
 {
     
+	ROS_INFO("Setting up the state subscriber.");
     this->state_sub = this->_nh.subscribe<mavros_msgs::State>
             (this->state_topic, 10, &MAVROSComponents::state_cb, this);
+	ROS_INFO("Setting up the position subscriber.");
     this->position_sub = this->_nh.subscribe<geometry_msgs::PoseStamped>
             (this->position_topic, 10, &MAVROSComponents::position_cb, this);
+	ROS_INFO("Setting up the target subscriber.");
     this->target_sub = this->_nh.subscribe<mavros_msgs::PositionTarget>
             (this->target_topic, 10, &MAVROSComponents::target_cb, this);
     //this->gcs_alert_sub = this->_nh.subscribe<std_msgs::String>
