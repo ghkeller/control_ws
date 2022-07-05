@@ -3,7 +3,7 @@
 # eventually change the node to get the path to the flights directory
 
 control: {
-flight_fname: "/home/gordon/control_ws/src/uav_control/flights/good_flight.csv",
+flight_fname: "/home/gordon_l1804/control_ws/src/uav_control/flights/good_flight.csv", # using absolute path for now
 avoidance: false,
 waypoint_distance_hit_thresh: 5.0,
 waypoint_hit_wait_time: 2.0,
