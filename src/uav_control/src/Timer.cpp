@@ -23,6 +23,12 @@ void Timer::start()
 	this->status = Status::ACTIVE;
 }
 
+void Timer::reset(void)
+{
+    // simply set the timer to inactive
+	this->status = Status::INACTIVE;
+}
+
 Timer::Status Timer::check(void)
 {
 	

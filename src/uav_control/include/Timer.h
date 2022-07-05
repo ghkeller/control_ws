@@ -16,6 +16,7 @@ class Timer
 
 	// public methods
 	void start();
+    void reset();
 	Status check();
 
 	private:
