@@ -127,7 +127,6 @@ include_directories(
 add_library(flight_lib
   src/WaypointFlight.cpp
   src/Flight.cpp
-  #include/StateMachine.h
   src/MAVROSComponents.cpp
   src/SetpointScheme.cpp
   src/Timer.cpp
