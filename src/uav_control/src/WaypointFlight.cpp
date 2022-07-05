@@ -3,10 +3,13 @@
 #include <queue>
 #include <vector>
 #include <ros/ros.h>
+#include <mavros_msgs/SetMode.h>
+#include <mavros_msgs/CommandBool.h>
 
 #include "StateMachine.h"
 #include "Flight.h"
 #include "WaypointFlight.h"
+#include "Timer.h"
 
 #define DEBUG
 
@@ -85,8 +88,8 @@ void WaypointFlight::cycle()
 		if (this->current_vehicle_state.connected) {
 			debugOut("	We're connected to the vehicle.", YELLOW);
 			debugOut("	Next state will be 'SETTING_OFFBOARD_MODE'...", CYAN);
-			//next_state = WaypointFlight::State::ARMING;
-			//this->flags.state_exit = true;
+			next_state = WaypointFlight::State::SETTING_OFFBOARD_MODE;
+			this->flags.state_exit = true;
 		}
 
 		// ACTIONS ON LOOP
@@ -100,23 +103,75 @@ void WaypointFlight::cycle()
 
 		break;
 
-		/*
+		case WaypointFlight::State::SETTING_OFFBOARD_MODE:
+        {
+		if (this->flags.state_entry == true) {
+			// state entry execution
+			debugOut("	In state 'SETTING_OFFBOARD_MODE'...", BLUE);
+			this->flags.state_entry = false;
+
+            // instantiate a timer, and start it
+            // instantiate the timer
+            this->timer.setTimeout(5000); //milliseconds
+            this->timer.start();
+		}
+        
+        // prepare a message to request offboard
+        mavros_msgs::SetMode offb_set_mode;
+        offb_set_mode.request.custom_mode = "OFFBOARD";
+
+		// STATE TRANSFER CONDITIONS 
+		// wait until offboard has been enabled
+
+        if ( this->current_vehicle_state.mode != "OFFBOARD" && this->timer.check() == Timer::Status::DONE ) {
+            debugOut("	We aren't in offboard mode, and the timer is finished.", YELLOW);
+            if ( this->set_mode_client.call(offb_set_mode) && offb_set_mode.response.mode_sent ) {
+                debugOut("	Offboard is now enabled.", YELLOW);
+                debugOut("	Next state will be 'ARMING'...", CYAN);
+                next_state = WaypointFlight::State::ARMING;
+                this->flags.state_exit = true;
+            }
+		}
+
+		// ACTIONS ON LOOP
+
+		if (this->flags.state_exit == true) {
+			debugOut("	Exiting 'WAITING_FOR_CONNECTION'...", MAGENTA);
+			cout << endl;
+			this->flags.state_exit = false;
+			this->flags.state_entry = true;
+            this->timer.reset();
+		}
+
+        }
+        break;
 
 		case WaypointFlight::State::ARMING:
+        {
 		
 		if (this->flags.state_entry == true) {
 			// state entry execution
 			debugOut("	In state 'ARMING'...", BLUE);
 			this->flags.state_entry = false;
+
+            // stall the arming operation
+            this->timer.setTimeout(5000); //milliseconds
+            this->timer.start();
 		}
+
+        mavros_msgs::CommandBool arm_cmd;
+        arm_cmd.request.value = true;
 
 		// STATE TRANSFER CONDITIONS 
 		// when the system finishes arming, transition into takeoff
-		if (event == WaypointFlight::Event::AIRCRAFT_ARMED) {
-			debugOut("	Aricraft is now armed.", YELLOW);
-			debugOut("	Next state will be 'TAKING_OFF'...", CYAN);
-			next_state = MissionStates::TAKING_OFF;
-			this->flags.state_exit = true;
+		if (!this->current_vehicle_state.armed && this->timer.check() == Timer::Status::DONE ) {
+            debugOut("	We aren't armed yet, and the timer is finished. Will try to arm...", YELLOW);
+            if ( this->arming_client.call(arm_cmd) && arm_cmd.response.success ) {
+                debugOut("	Aricraft is now armed.", YELLOW);
+                debugOut("	Next state will be 'TAKING_OFF'...", CYAN);
+                next_state = WaypointFlight::State::TAKING_OFF;
+                this->flags.state_exit = true;
+            }
 		}
 
 
@@ -127,7 +182,10 @@ void WaypointFlight::cycle()
 			this->flags.state_entry = true;
 		}
 
+        }
 		break;
+
+/*
 
 		case MissionStates::TAKING_OFF:
 		case WaypointFlight::State::INIT:

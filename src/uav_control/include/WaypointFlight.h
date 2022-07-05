@@ -8,6 +8,7 @@
 
 #include "Flight.h"
 #include "StateMachine.h"
+#include "Timer.h"
 
 
 /*
@@ -53,8 +54,9 @@ class WaypointFlight : public Flight
 		// pseudo-enum declaration
 		static const int INIT = 0;
 		static const int WAITING_FOR_CONNECTION = 1;
-		static const int CHECKING_PREARM = 2;
+		static const int SETTING_OFFBOARD_MODE = 2;
 		static const int ARMING = 3;
+		static const int TAKING_OFF = 4;
 
 		State ();
 		State ( int starting_state ) { this->value() = starting_state; };
@@ -77,6 +79,8 @@ class WaypointFlight : public Flight
 	void cycle();
 
 	private:
+	protected:
+    Timer timer = Timer();
 
 };
 
