@@ -26,34 +26,34 @@ MAVROSComponents::MAVROSComponents()
 void MAVROSComponents::fetchParams()
 {
 	//flight/mission parameters
-    this->_nh.getParam(ros::this_node::getNamespace() + "/control/flight_fname", this->flight_name);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/control/avoidance", this->avoidance);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_distance_hit_thresh", this->waypoint_distance_hit_thresh);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/control/waypoint_hit_wait_time", this->waypoint_hit_wait_time);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/control/starting_waypoint_number", this->starting_waypoint_number);
+    this->_nh.getParam("/control/flight_fname", this->flight_name);
+    this->_nh.getParam("/control/avoidance", this->avoidance);
+    this->_nh.getParam("/control/waypoint_distance_hit_thresh", this->waypoint_distance_hit_thresh);
+    this->_nh.getParam("/control/waypoint_hit_wait_time", this->waypoint_hit_wait_time);
+    this->_nh.getParam("/control/starting_waypoint_number", this->starting_waypoint_number);
 
 	//topics
-    this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/state_topic", this->state_topic);
-    this->_nh.getParam(ros::this_node::getNamespace() +  "/mavros/position_topic", this->position_topic);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/setpoint_topic", this->setpoint_topic);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/target_topic", this->target_topic);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/gcs/alert_topic", this->gcs_alert_topic);
+    this->_nh.getParam("/mavros/state_topic", this->state_topic);
+    this->_nh.getParam("/mavros/position_topic", this->position_topic);
+    this->_nh.getParam("/mavros/setpoint_topic", this->setpoint_topic);
+    this->_nh.getParam("/mavros/target_topic", this->target_topic);
+    this->_nh.getParam("/gcs/alert_topic", this->gcs_alert_topic);
 
 	//services
-    this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/arming_service", this->arming_service); 
-    this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/mode_service", this->set_mode_service);
-    this->_nh.getParam(ros::this_node::getNamespace() + "/mavros/takeoff_service", this->takeoff_service);
+    this->_nh.getParam("/mavros/arming_service", this->arming_service); 
+    this->_nh.getParam("/mavros/mode_service", this->set_mode_service);
+    this->_nh.getParam("/mavros/takeoff_service", this->takeoff_service);
 }
 
 void MAVROSComponents::setupServices()
 {
 	
     this->arming_client = this->_nh.serviceClient<mavros_msgs::CommandBool>
-            (this->arming_service);
+            (ros::this_node::getNamespace() + this->arming_service);
     this->set_mode_client = this->_nh.serviceClient<mavros_msgs::SetMode>
-            (this->set_mode_service);
+            (ros::this_node::getNamespace() + this->set_mode_service);
     this->takeoff_client = this->_nh.serviceClient<mavros_msgs::CommandTOL>
-    		(this->takeoff_service);
+    		(ros::this_node::getNamespace() + this->takeoff_service);
 }
 
 void MAVROSComponents::setupSubscribers()
@@ -61,13 +61,13 @@ void MAVROSComponents::setupSubscribers()
     
 	ROS_INFO("Setting up the state subscriber.");
     this->state_sub = this->_nh.subscribe<mavros_msgs::State>
-            (this->state_topic, 10, &MAVROSComponents::state_cb, this);
+            (ros::this_node::getNamespace() + this->state_topic, 10, &MAVROSComponents::state_cb, this);
 	ROS_INFO("Setting up the position subscriber.");
     this->position_sub = this->_nh.subscribe<geometry_msgs::PoseStamped>
-            (this->position_topic, 10, &MAVROSComponents::position_cb, this);
+            (ros::this_node::getNamespace() + this->position_topic, 10, &MAVROSComponents::position_cb, this);
 	ROS_INFO("Setting up the target subscriber.");
     this->target_sub = this->_nh.subscribe<mavros_msgs::PositionTarget>
-            (this->target_topic, 10, &MAVROSComponents::target_cb, this);
+            (ros::this_node::getNamespace() + this->target_topic, 10, &MAVROSComponents::target_cb, this);
     //this->gcs_alert_sub = this->_nh.subscribe<std_msgs::String>
             //(this->gcs_alert_topic, 10, &MAVROSComponents::gcs_alert_cb, this);
 
@@ -76,7 +76,7 @@ void MAVROSComponents::setupSubscribers()
 void MAVROSComponents::setupPublishers(void)
 {
     this->target_pos_pub = this->_nh.advertise<mavros_msgs::PositionTarget>
-            (this->setpoint_topic, 100);
+            (ros::this_node::getNamespace() + this->setpoint_topic, 100);
 }
 
 
