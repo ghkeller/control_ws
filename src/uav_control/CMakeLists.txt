@@ -9,6 +9,7 @@ add_compile_options(-std=c++11)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
+  sensor_msgs
   mavros
   roscpp
   rospy
@@ -200,6 +201,39 @@ add_executable(test_separate_modules
 
 target_link_libraries(test_separate_modules
   flight_lib
+  ${catkin_LIBRARIES}
+)
+
+
+add_executable(example_offboard_control
+	src/example_offboard_control.cpp
+)
+
+target_link_libraries(example_offboard_control
+  ${catkin_LIBRARIES}
+)
+
+add_executable(maintain_hover_control
+	src/maintain_hover_control.cpp
+)
+
+target_link_libraries(maintain_hover_control
+  ${catkin_LIBRARIES}
+)
+
+add_executable(maintain_altitude_control
+	src/maintain_altitude_control.cpp
+)
+
+target_link_libraries(maintain_altitude_control
+  ${catkin_LIBRARIES}
+)
+
+add_executable(maintain_alt_fw_vel_control
+	src/maintain_alt_fw_vel_control.cpp
+)
+
+target_link_libraries(maintain_alt_fw_vel_control
   ${catkin_LIBRARIES}
 )
 
