@@ -131,6 +131,7 @@ int main(int argc, char **argv)
             
             // err deriv.
             double e_delta = e - e_last;
+            e_last = e;
             
             // anti-windup conditional/err int.
             if (e_sum < 10.0 && e_sum > -10.0)
@@ -140,7 +141,7 @@ int main(int argc, char **argv)
             if (e < 10.0 && e > -10.0) {
                 
                 // control law
-                pt.velocity.z = KP*e + KI*e_sum + KI*e_delta;
+                pt.velocity.z = KP*e + KI*e_sum + KD*e_delta;
                 ROS_INFO("height: %f", pt.position.z);
             }
         }
