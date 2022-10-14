@@ -78,12 +78,17 @@ int main(int argc, char **argv)
 
     ros::Time last_request = ros::Time::now();
 
-    // Terr. following PID vars/terms
+    // Terr. following PID vars/default terms
     double e_sum = 0;
     double e_last = 0;
-    double KP = 1.0;
+    double KP = 5.0;
     double KI = 0.0;
     double KD = 0.0;
+
+    // read in params
+    nh.getParam("/control/terr_follow_KP", KP);
+    nh.getParam("/control/terr_follow_KI", KI);
+    nh.getParam("/control/terr_follow_KD", KD);
 
     while(ros::ok()){
         if( current_state.mode != "OFFBOARD" &&
