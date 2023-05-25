@@ -119,20 +119,20 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-	include
   	${catkin_INCLUDE_DIRS}
 )
+	#include
 
 ## Declare a C++ library
 
-add_library(flight_lib
-  src/WaypointFlight.cpp
-  src/Flight.cpp
-  src/MAVROSComponents.cpp
-  src/SetpointScheme.cpp
-  src/Timer.cpp
-  src/Parsing.cpp
-)
+#add_library(flight_lib
+#  src/WaypointFlight.cpp
+#  src/Flight.cpp
+#  src/MAVROSComponents.cpp
+#  src/SetpointScheme.cpp
+#  src/Timer.cpp
+#  src/Parsing.cpp
+#)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -195,55 +195,66 @@ add_library(flight_lib
 #)
 #
 
-add_executable(test_separate_modules
-	src/test_separate_modules.cpp
-)
-
-target_link_libraries(test_separate_modules
-  flight_lib
-  ${catkin_LIBRARIES}
-)
-
-
-add_executable(example_offboard_control
-	src/example_offboard_control.cpp
-)
-
-target_link_libraries(example_offboard_control
-  ${catkin_LIBRARIES}
-)
-
-add_executable(maintain_hover_control
-	src/maintain_hover_control.cpp
-)
-
-target_link_libraries(maintain_hover_control
-  ${catkin_LIBRARIES}
-)
-
-add_executable(maintain_altitude_control
-	src/maintain_altitude_control.cpp
-)
-
-target_link_libraries(maintain_altitude_control
-  ${catkin_LIBRARIES}
-)
-
-add_executable(maintain_alt_fw_vel_control
-	src/maintain_alt_fw_vel_control.cpp
-)
-
-target_link_libraries(maintain_alt_fw_vel_control
-  ${catkin_LIBRARIES}
-)
-
-#add_executable(teleop_mavros
-#  src/teleop_mavros.cpp
+#add_executable(test_separate_modules
+#	src/test_separate_modules.cpp
 #)
-#target_link_libraries(teleop_mavros
+#
+#target_link_libraries(test_separate_modules
+#  flight_lib
 #  ${catkin_LIBRARIES}
 #)
+#
+#
+#add_executable(example_offboard_control
+#	src/example_offboard_control.cpp
+#)
+#
+#target_link_libraries(example_offboard_control
+#  ${catkin_LIBRARIES}
+#)
+#
+#add_executable(maintain_hover_control
+#	src/maintain_hover_control.cpp
+#)
+#
+#target_link_libraries(maintain_hover_control
+#  ${catkin_LIBRARIES}
+#)
+#
+#add_executable(maintain_altitude_control
+#	src/maintain_altitude_control.cpp
+#)
+#
+#target_link_libraries(maintain_altitude_control
+#  ${catkin_LIBRARIES}
+#)
+#
+#add_executable(maintain_alt_fw_vel_control
+#	src/maintain_alt_fw_vel_control.cpp
+#)
+#
+#target_link_libraries(maintain_alt_fw_vel_control
+#  ${catkin_libraries}
+#)
+#
 
+add_executable(go_to_point_and_start_terr_foll
+	src/go_to_point_and_start_terr_foll.cpp
+)
+
+target_link_libraries(go_to_point_and_start_terr_foll
+	${catkin_LIBRARIES}
+)
+
+#
+##
+###add_executable(teleop_mavros
+##  src/teleop_mavros.cpp
+##)
+##target_link_libraries(teleop_mavros
+##  ${catkin_LIBRARIES}
+##)
+#
 #############
 ## Install ##
 #############

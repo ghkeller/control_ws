@@ -8,4 +8,5 @@ srv_gen/
 .catkin_tools/
 .catkin_workspace
 obj/
+*.swp
 
