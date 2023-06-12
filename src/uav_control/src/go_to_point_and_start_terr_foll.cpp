@@ -10,16 +10,17 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <sensor_msgs/LaserScan.h>
+#include <std_msgs/Float32.h>
 
 mavros_msgs::State current_state;
-sensor_msgs::LaserScan current_alt_height;
+double current_slam_height = 0.0;
 
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
 
-void alt_cb(const sensor_msgs::LaserScan::ConstPtr& msg){
-    current_alt_height = *msg;
+void height_cb(const std_msgs::Float32::ConstPtr& msg){
+    current_slam_height = msg->data;
 }
 
 int main(int argc, char **argv)
@@ -29,8 +30,8 @@ int main(int argc, char **argv)
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
             ("mavros/state", 10, state_cb);
-    ros::Subscriber alt_sub = nh.subscribe<sensor_msgs::LaserScan>
-            ("laser_altimeter/laser/scan", 10, alt_cb);
+    ros::Subscriber height_sub = nh.subscribe<std_msgs::Float32>
+            ("/slam/local_height_est", 10, height_cb);
     ros::Publisher local_pos_targ_pub = nh.advertise<mavros_msgs::PositionTarget>
             ("mavros/setpoint_raw/local", 10);
     ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
@@ -137,55 +138,53 @@ int main(int argc, char **argv)
                 mavros_msgs::PositionTarget::IGNORE_YAW_RATE; 
             pt.position.x = 76.6;
             pt.position.y = -146.9;
-            pt.position.z = 36.2;
+            pt.position.z = 30.8;
             pt.yaw = -0.827;
 		ROS_INFO("Going to the start point for tf...");
 
         } else if( current_state.armed && 
 	    (ros::Time::now() - last_request > ros::Duration(45.0))){
-            //
-            //
-	    // conduct the terrain following
-            pt.type_mask = mavros_msgs::PositionTarget::IGNORE_VX |
-                mavros_msgs::PositionTarget::IGNORE_VY | 
-                mavros_msgs::PositionTarget::IGNORE_VZ | 
-                mavros_msgs::PositionTarget::IGNORE_AFX | 
-                mavros_msgs::PositionTarget::IGNORE_AFY | 
-                mavros_msgs::PositionTarget::IGNORE_AFZ | 
-                mavros_msgs::PositionTarget::IGNORE_YAW_RATE; 
-            pt.position.x = 76.6;
-            pt.position.y = -146.9;
-            pt.position.z = 36.2;
-            pt.yaw = -0.827;
-		ROS_INFO("Going to the start point for tf...");
+		//
+		//
+		// conduct the terrain following
+		//
+		// apply to the velocity command
+		pt.type_mask = mavros_msgs::PositionTarget::IGNORE_PX |
+			mavros_msgs::PositionTarget::IGNORE_PY | 
+			mavros_msgs::PositionTarget::IGNORE_PZ | 
+			mavros_msgs::PositionTarget::IGNORE_AFX | 
+			mavros_msgs::PositionTarget::IGNORE_AFY | 
+			mavros_msgs::PositionTarget::IGNORE_AFZ | 
+			mavros_msgs::PositionTarget::IGNORE_YAW_RATE; 
+		pt.velocity.x = 0.5;
+		pt.velocity.y = 0.0;
+		pt.velocity.z = 0.0;
+
+		// listen for the height difference and apply to fw vel command
+
+		if (current_slam_height > 0.0001) {
+		    // err
+		    double e = hover_height - current_slam_height;
+		    
+		    // err deriv.
+		    double e_delta = e - e_last;
+		    e_last = e;
+		    
+		    // anti-windup conditional/err int.
+		    if (e_sum < 10.0 && e_sum > -10.0)
+			e_sum = e_sum + e;
+		
+		    // adjust pose if it is a reasonable adjustment (filter out inf)
+		    if (e < 10.0 && e > -10.0) {
+			
+			// control law
+			pt.velocity.z = KP*e + KI*e_sum + KD*e_delta;
+			ROS_INFO("height: %f", pt.position.z);
+		    }
+		}
 
         }
 
-
-        
-        // get current altimeter height
-	/*
-        if (!current_alt_height.ranges.empty()) {
-            // err
-            double e = hover_height - current_alt_height.ranges[0];
-            
-            // err deriv.
-            double e_delta = e - e_last;
-            e_last = e;
-            
-            // anti-windup conditional/err int.
-            if (e_sum < 10.0 && e_sum > -10.0)
-                e_sum = e_sum + e;
-        
-            // adjust pose if it is a reasonable adjustment (filter out inf)
-            if (e < 10.0 && e > -10.0) {
-                
-                // control law
-                pt.velocity.z = KP*e + KI*e_sum + KD*e_delta;
-                ROS_INFO("height: %f", pt.position.z);
-            }
-        }
-	*/
 
         // broadcast the new position target desired
         local_pos_targ_pub.publish(pt);
