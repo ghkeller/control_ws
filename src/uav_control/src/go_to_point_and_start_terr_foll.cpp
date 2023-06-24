@@ -11,6 +11,7 @@
 #include <mavros_msgs/State.h>
 #include <sensor_msgs/LaserScan.h>
 #include <std_msgs/Float32.h>
+#include <cmath>
 
 mavros_msgs::State current_state;
 double current_slam_height = 0.0;
@@ -79,10 +80,18 @@ int main(int argc, char **argv)
 
     ros::Time last_request = ros::Time::now();
 
+
+    // apply the direction angle to the lateral vel
+    double yaw = -0.827;
+    double horiz_speed = 0.5; // m/s
+    double x_vel = horiz_speed * cos(yaw);
+    double y_vel = horiz_speed * sin(yaw);
+
+
     // Terr. following PID vars/default terms
     double e_sum = 0;
     double e_last = 0;
-    double KP = 5.0;
+    double KP = 1.0;
     double KI = 0.0;
     double KD = 0.0;
 
@@ -125,7 +134,8 @@ int main(int argc, char **argv)
 		ROS_INFO("Going to the takeoff point...");
 
         } else if( current_state.armed && 
-	    (ros::Time::now() - last_request > ros::Duration(20.0))){
+	    (ros::Time::now() - last_request > ros::Duration(20.0)) &&
+            (ros::Time::now() - last_request <= ros::Duration(110.0))){
             //
             //
 	    //go to the desired start point
@@ -139,15 +149,16 @@ int main(int argc, char **argv)
             pt.position.x = 76.6;
             pt.position.y = -146.9;
             pt.position.z = 30.8;
-            pt.yaw = -0.827;
+            pt.yaw = yaw;
 		ROS_INFO("Going to the start point for tf...");
 
         } else if( current_state.armed && 
-	    (ros::Time::now() - last_request > ros::Duration(45.0))){
+	    (ros::Time::now() - last_request > ros::Duration(110.0))){
 		//
 		//
 		// conduct the terrain following
 		//
+
 		// apply to the velocity command
 		pt.type_mask = mavros_msgs::PositionTarget::IGNORE_PX |
 			mavros_msgs::PositionTarget::IGNORE_PY | 
@@ -156,8 +167,8 @@ int main(int argc, char **argv)
 			mavros_msgs::PositionTarget::IGNORE_AFY | 
 			mavros_msgs::PositionTarget::IGNORE_AFZ | 
 			mavros_msgs::PositionTarget::IGNORE_YAW_RATE; 
-		pt.velocity.x = 0.5;
-		pt.velocity.y = 0.0;
+		pt.velocity.x = x_vel;
+		pt.velocity.y = y_vel;
 		pt.velocity.z = 0.0;
 
 		// listen for the height difference and apply to fw vel command
